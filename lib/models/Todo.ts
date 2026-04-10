@@ -2,16 +2,34 @@ import mongoose, {Schema, Document, Types} from "mongoose";
 
 export interface ITodo extends Document {
     title: string;
+    description: string;
+    dueDate: Date;
+    priority: Number;
     completed: boolean;
     userId: string;
 }
 
 const TodoSchema = new Schema<ITodo>({
-  title: {
+    title: {
         type: String,
         required: true,
         trim: true,
         minlength: 1,
+    },
+    description: {
+        type: String,
+        required: false,
+        trim: true,
+        minlength: 1,
+    },
+    dueDate: {
+        type: Date,
+        required: false,
+        index: true,
+    },
+    priority: {
+        type: Number,
+        default: 4,
     },
     completed: { 
         type: Boolean, 

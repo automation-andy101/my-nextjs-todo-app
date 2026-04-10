@@ -32,7 +32,7 @@ export default function SignIn() {
             if (result.error) {
                 setError(result.error.message ?? "Failed to sign in");
             } else {
-                router.push("/todo");
+                router.push("/today");
             }
         } catch (err) {
             setError("An unexpected error occurred");
