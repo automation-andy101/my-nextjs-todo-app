@@ -3,15 +3,18 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { ListTodo, Calendar, Search, CirclePlus } from "lucide-react";
+import { ListTodo, Calendar as CalendarIcon, Search, CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 export default function Sidebar() {
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+    const [dueDate, setDueDate] = useState<Date | undefined>();
 
     const pathname = usePathname();
 
@@ -40,7 +43,7 @@ export default function Sidebar() {
                     <span>Today</span>
                 </Link>
                 <Link href="/upcoming" className={`${baseItemClass} ${linkClass("/upcoming")}`}>
-                    <Calendar size={18} />
+                    <CalendarIcon size={18} />
                     <span>Upcoming</span>
                 </Link>
                 <Link href="/search" className={`${baseItemClass} ${linkClass("/search")}`}>
@@ -63,6 +66,33 @@ export default function Sidebar() {
                         <Label htmlFor="description">Description</Label>
                         <Textarea id="description" placeholder="Add details..." className="resize-none" />
                     </div>
+                    <div className="space-y-2">
+                        <Label>Due date</Label>
+
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-start text-left font-normal"
+                                >
+                                    {dueDate
+                                        ? dueDate.toDateString()
+                                        : "Select a due date"
+                                    }
+                                </Button>
+                            </PopoverTrigger>
+
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={dueDate}
+                                    onSelect={setDueDate}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+
                     <DialogFooter>
                         <Button className="cursor-pointer" variant="ghost" onClick={() => setIsAddTaskOpen(false)}>
                             Cancel
