@@ -15,6 +15,17 @@ import { Calendar } from "@/components/ui/calendar";
 export default function Sidebar() {
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [dueDate, setDueDate] = useState<Date | undefined>();
+    const [priority, setPriority] = useState(4);
+    const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+
+    const priorities = [
+        { value: 1, label: "Priority 1", color: "text-red-500" },
+        { value: 2, label: "Priority 2", color: "text-orange-500" },
+        { value: 3, label: "Priority 3", color: "text-blue-500" },
+        { value: 4, label: "Priority 4", color: "text-gray-500" },
+    ];
+
+    const selectedPriority = priorities.find((p) => p.value === priority);
 
     const pathname = usePathname();
 
@@ -86,9 +97,46 @@ export default function Sidebar() {
                                 <Calendar
                                     mode="single"
                                     selected={dueDate}
-                                    onSelect={setDueDate}
+                                    onSelect={(date) => {
+                                        if (date) setDueDate(date);
+                                    }}
                                     initialFocus
                                 />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Priority</Label>
+
+                        <Popover open={isPriorityOpen} onOpenChange={setIsPriorityOpen}>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 ${selectedPriority?.color}`}
+                                >
+                                    {selectedPriority?.label}
+                                </Button>
+                            </PopoverTrigger>
+
+                            <PopoverContent className="w-48 p-1">
+                                <div className="flex flex-col">
+                                    {priorities.map((p) => (
+                                        <button
+                                            key={p.value}
+                                            onClick={() => {
+                                                setPriority(p.value)
+                                                setIsPriorityOpen(false)
+                                            }}
+                                            className={`flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 ${p.color}`}
+                                        >
+                                            <span>{p.label}</span>
+
+                                            {priority === p.value && (
+                                                <span className="text-xs">✓</span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
                             </PopoverContent>
                         </Popover>
                     </div>
