@@ -1,23 +1,78 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
-import { ListTodo, Calendar, Search } from "lucide-react";
+import { ListTodo, Calendar, Search, CirclePlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Sidebar() {
-  const pathname = usePathname();
+    const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
 
-  const linkClass = (path: string) =>
-    pathname === path ? "font-bold" : "text-gray-500";
+    const pathname = usePathname();
 
-  return (
-    <aside className="w-64 h-screen border-r p-4">
-      <nav className="flex flex-col gap-4">
-        {/* <ListTodo /><Link href="/today" className={linkClass("/today")}>Add task</Link> */}
-        <ListTodo /><Link href="/today" className={linkClass("/today")}>Today</Link>
-        <Calendar /><Link href="/upcoming" className={linkClass("/upcoming")}>Upcoming</Link>
-        <Search /> <Link href="/search" className={linkClass("/search")}>Search</Link>
-      </nav>
-    </aside>
-  );
+    const baseItemClass = "flex items-center gap-2 px-2 py-2 rounded-md text-sm";
+
+    const linkClass = (path: string) =>
+        `${baseItemClass} ${
+            pathname === path
+                ? "font-semibold bg-gray-100"
+                : "text-gray-600 hover:bg-gray-100"
+        }`;
+
+    return (
+        <aside className="w-64 h-screen border-r p-4">
+            <nav className="flex flex-col gap-4">
+                <Button 
+                    variant="ghost"
+                    onClick={() => setIsAddTaskOpen(true)}
+                    className={`${baseItemClass} text-red-500 font-semibold justify-start w-full`}    
+                >
+                    <CirclePlus size={18} />
+                    <span>Add task</span>
+                </Button>
+                <Link href="/today" className={`${baseItemClass} ${linkClass("/today")}`}>
+                    <ListTodo size={18} />
+                    <span>Today</span>
+                </Link>
+                <Link href="/upcoming" className={`${baseItemClass} ${linkClass("/upcoming")}`}>
+                    <Calendar size={18} />
+                    <span>Upcoming</span>
+                </Link>
+                <Link href="/search" className={`${baseItemClass} ${linkClass("/search")}`}>
+                    <Search size={18} />
+                    <span>Search</span>
+                </Link>
+            </nav>
+
+            <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>New Task</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input id="title" placeholder="Task title" autoFocus />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea id="description" placeholder="Add details..." className="resize-none" />
+                    </div>
+                    <DialogFooter>
+                        <Button className="cursor-pointer" variant="ghost" onClick={() => setIsAddTaskOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button className="bg-red-500 hover:bg-red-600 cursor-pointer">
+                            Add Task
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>  
+            </Dialog>
+        </aside>
+    );
 }
