@@ -1,17 +1,9 @@
-import Sidebar from "@/components/sidebar";
-import { ReactNode } from "react";
+import SidebarLayout from "@/components/sidebar-layout";
 
-interface Props {
-  children: ReactNode;
-}
-
-export default function DashboardLayout({ children }: Props) {
-    return (
-        <div className="flex h-screen">
-            <Sidebar />
-            <main className="flex-1">
-                {children}
-            </main>
-        </div>
-    );
+export default function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    return <SidebarLayout>{children}</SidebarLayout>;
 }
