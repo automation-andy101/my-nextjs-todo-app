@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { ListTodo, Calendar as CalendarIcon, Search, CirclePlus, PanelLeft } from "lucide-react";
+import { ListTodo, Calendar as CalendarIcon, Search, CirclePlus, PanelLeft, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -16,13 +16,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
-export default function Sidebar({ 
-    sideNavOpen, 
-    setSideNavOpen }: { 
-        sideNavOpen: boolean;  
-        setSideNavOpen: (value: boolean) => void;
-}) {
-
+export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: boolean;  setSideNavOpen: (value: boolean) => void; }) {
+    console.log("SIDE BAR OPEN - " + sideNavOpen);
+    
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [dueDate, setDueDate] = useState<Date | undefined>();
     const [priority, setPriority] = useState(4);
@@ -55,32 +51,40 @@ export default function Sidebar({
     return (
         <>
             <aside
-                className={`fixed top-0 left-0 h-screen w-64 border-r bg-white p-4 transition-transform duration-300 ${
+                className={`relative top-0 left-0 h-screen w-64 border-r bg-white p-4 transition-transform duration-300 ${
                     sideNavOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             > 
                 <nav className="flex flex-col gap-4">
                     <div className="flex flex-row items-center justify-between pt-3 mb-4">
                         <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                            <DropdownMenuTrigger
+                                className="w-full flex items-center gap-3 justify-start px-2 py-2 cursor-pointer focus-visible:ring-0 focus-visible:outline-none"
+                                asChild
+                            >
                                 <Button
                                     variant="ghost"
                                     className="w-full flex items-center gap-3 justify-start px-2 py-2 cursor-pointer"
                                 >
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarFallback className="bg-primary text-white">
-                                            {session?.user?.name?.[0]?.toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-8 w-8">
+                                            <AvatarFallback className="bg-primary text-white">
+                                                {session?.user?.name?.[0]?.toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
 
-                                    <div className="flex flex-col text-left">
-                                        <span className="text-sm font-medium">
-                                            {firstName}
-                                        </span>
-                                        {/* <span className="text-xs text-muted-foreground">
-                                            {session?.user?.email}
-                                        </span> */}
+                                        <div className="flex flex-col text-left">
+                                            <span className="text-sm font-medium">
+                                                {firstName}
+                                            </span>
+                                            {/* <span className="text-xs text-muted-foreground">
+                                                {session?.user?.email}
+                                            </span> */}
+                                        </div>
                                     </div>
+
+                                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                                    
                                 </Button>
                             </DropdownMenuTrigger>
 
@@ -217,9 +221,11 @@ export default function Sidebar({
                 variant="ghost"
                 size="icon"
                 onClick={() => setSideNavOpen(!sideNavOpen)}
-                className={`fixed top-4 left-4 z-50 cursor-pointer transition-all duration-300 ${
-                    sideNavOpen ? "left-54" : "left-0"
-                }`}
+                className={`absolute top-4 left-4 z-50 cursor-pointer transition-all duration-300 ${
+                    sideNavOpen
+                        ? "left-60 -translate-x-1/2"
+                        : "left-2"
+                }`} 
             >
                 <PanelLeft />
             </Button>

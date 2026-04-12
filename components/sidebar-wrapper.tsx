@@ -3,11 +3,7 @@
 import { useState } from 'react';
 import Sidebar from "./sidebar";
 
-export default function SidebarLayout({
-    children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function SidebarWrapper({ children }: { children: React.ReactNode }) {
     const [sideNavOpen, setSideNavOpen] = useState(true);
 
     return (
@@ -19,11 +15,7 @@ export default function SidebarLayout({
             />
             
             {/* Main Content */}
-            <main
-                className={`transition-all duration-300 ${
-                    sideNavOpen ? "ml-64" : "ml-0"
-                }`}
-            >
+            <main className={`transition-all duration-300 ${sideNavOpen ? "ml-64" : "ml-0"}`}>
                 {children}
             </main>
         </div>
