@@ -5,38 +5,30 @@ import connectDB from "../db";
 import { getSession } from "../auth/auth";
 import Todo from "../models/Todo";
 
-interface CreateTodoData {
-  title: string;
-  description?: string;
-  dueDate?: Date;
-  priority?: number;
-}
-
-export async function createTodo(data: CreateTodoData) {
+export async function createTodo(formData: FormData) {
     const session = await getSession();
 
     if (!session?.user) {
-        return { error: "Unauthorized" };
+        throw new Error("Unauthorized");
     }
 
     await connectDB();
 
-    const { title, description, dueDate, priority } = data;
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const priority = Number(formData.get("priority")) || 4;
+    const dueDateValue = formData.get("dueDate") as string;
 
-    if (!title) {
-        return { error: "Title is required" };
-    }
+    const dueDate = dueDateValue ? new Date(dueDateValue) : undefined;
 
     const todo = await Todo.create({
         title,
         description,
+        priority,
         dueDate,
-        priority: priority || 4,
         completed: false,
         userId: session.user.id,
     });
 
-    revalidatePath("/dashboard");
-
-    return { data: JSON.parse(JSON.stringify(todo)) };
+    revalidatePath("/");
 }

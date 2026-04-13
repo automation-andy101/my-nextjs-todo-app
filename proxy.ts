@@ -1,16 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "./lib/auth/auth";
+import { auth } from "./lib/auth/auth";
 
 export async function proxy(request: NextRequest) {
-    const session = await getSession();
-    const isTodoPage = request.nextUrl.pathname.startsWith("/todo");
+  const session = await auth.api.getSession({
+    headers: request.headers, 
+  });
 
-    const isSignInPage = request.nextUrl.pathname.startsWith("/sign-in");
-    const isSignUpPage = request.nextUrl.pathname.startsWith("/sign-up");
+  const { pathname } = request.nextUrl;
 
-    if ((isSignInPage || isSignUpPage) && session?.user) {
-        return NextResponse.redirect(new URL("/todo", request.url));
-    }
+  const isAuthPage =
+    pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
-    return NextResponse.next();
+  const isDashboardRoute =
+    pathname.startsWith("/today") ||
+    pathname.startsWith("/upcoming") ||
+    pathname.startsWith("/search");
+
+  // Logged in → block auth pages
+  if (isAuthPage && session?.user) {
+    return NextResponse.redirect(new URL("/today", request.url));
+  }
+
+  // Not logged in → block dashboard
+  if (isDashboardRoute && !session?.user) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  return NextResponse.next();
 }
