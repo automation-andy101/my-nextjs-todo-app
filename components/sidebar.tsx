@@ -251,7 +251,7 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                         : "left-2"
                 }`} 
             >
-                <PanelLeft />
+                <PanelLeft className="w-6 h-6w-6 h-6 transition-all duration-300 scale-130" />
             </Button>
         </>
     );
