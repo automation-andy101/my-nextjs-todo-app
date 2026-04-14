@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { createTodo } from "@/lib/actions/todo";
+import { toast } from "react-toastify";
 
 export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: boolean;  setSideNavOpen: (value: boolean) => void; }) {    
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
@@ -126,22 +127,34 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                 </nav>
 
                 { /* Add Todo dialog popup */ }
-                <form action={createTodo}>
-                    <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
-                        <DialogContent>
-                            <DialogHeader>
+                <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
+                    <DialogContent>
+                        <form
+                            action={async (formData) => {
+                                try {
+                                    await createTodo(formData);
+
+                                    toast.success("Task added successfully ✅");
+
+                                    setIsAddTaskOpen(false);
+                                } catch (err) {
+                                    toast.error("Failed to add task ❌");
+                                }
+                            }}
+                        >
+                            <DialogHeader className="mb-6">
                                 <DialogTitle>New Task</DialogTitle>
                             </DialogHeader>
 
-                            <div className="space-y-2">
+                            <div className="space-y-2 mb-4">
                                 <Label htmlFor="title">Title</Label>
                                 <Input id="title" name="title" placeholder="Task title" autoFocus />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2 mb-4">
                                 <Label htmlFor="description">Description</Label>
                                 <Textarea id="description" name="description" placeholder="Add details..." className="resize-none" />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2 mb-4">
                                 <Label>Due date</Label>
 
                                 <Popover>
@@ -174,7 +187,7 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                                     />
                                 </Popover>
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2  mb-4">
                                 <Label>Priority</Label>
 
                                 <Popover open={isPriorityOpen} onOpenChange={setIsPriorityOpen}>
@@ -191,6 +204,7 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                                         <div className="flex flex-col">
                                             {priorities.map((p) => (
                                                 <button
+                                                    type="button"
                                                     key={p.value}
                                                     onClick={() => {
                                                         setPriority(p.value)
@@ -215,14 +229,16 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                                 <Button className="cursor-pointer" variant="ghost" onClick={() => setIsAddTaskOpen(false)}>
                                     Cancel
                                 </Button>
-                                <Button className="bg-red-500 hover:bg-red-600 cursor-pointer">
+                                <Button 
+                                    type="submit"
+                                    className="bg-red-500 hover:bg-red-600 cursor-pointer"
+                                >
                                     Add Task
                                 </Button>
                             </DialogFooter>
-                        </DialogContent>  
-                    </Dialog>
-                </form>
-                
+                        </form>
+                    </DialogContent>  
+                </Dialog>
             </aside>
 
             <Button
