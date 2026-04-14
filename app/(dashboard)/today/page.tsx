@@ -46,7 +46,7 @@ const page = () => {
           </h2>
 
           {/* Divider line */}
-          <div className="border-b-2 border-black mt-2 mb-4 w-[180%]"></div>
+          <div className="border-b-2 border-black mt-2 mb-6 w-[280%]"></div>
 
           {/* Tasks list */}
           <div className="space-y-3">
