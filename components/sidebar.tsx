@@ -107,7 +107,7 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                     <Button 
                         variant="ghost"
                         onClick={() => setIsAddTaskOpen(true)}
-                        className={`${baseItemClass} text-red-500 font-semibold justify-start w-full`}    
+                        className={`${baseItemClass} text-red-500 font-semibold justify-start w-full cursor-pointer`}    
                     >
                         <CirclePlus size={18} />
                         <span>Add task</span>
