@@ -16,22 +16,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { createTodo } from "@/lib/actions/todo";
-import { toast } from "react-toastify";
+import AddTaskDialog from "./add-task-dialog";
+
 
 export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: boolean;  setSideNavOpen: (value: boolean) => void; }) {    
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
-    const [dueDate, setDueDate] = useState<Date | undefined>();
-    const [priority, setPriority] = useState(4);
-    const [isPriorityOpen, setIsPriorityOpen] = useState(false);
-
-    const priorities = [
-        { value: 1, label: "Priority 1", color: "text-red-500" },
-        { value: 2, label: "Priority 2", color: "text-orange-500" },
-        { value: 3, label: "Priority 3", color: "text-blue-500" },
-        { value: 4, label: "Priority 4", color: "text-gray-500" },
-    ];
-
-    const selectedPriority = priorities.find((p) => p.value === priority);
 
     const pathname = usePathname();
 
@@ -93,15 +82,6 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                                 <SignOutButton />
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        
-                        {/* <Button
-                            variant="ghost" 
-                            size="lg"
-                            className="cursor-pointer"
-                            onClick={() => setSideNavOpen(!sideNavOpen)}
-                        >
-                            <PanelLeft />                    
-                        </Button> */}
                     </div>
                     
                     <Button 
@@ -127,118 +107,8 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                 </nav>
 
                 { /* Add Todo dialog popup */ }
-                <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
-                    <DialogContent>
-                        <form
-                            action={async (formData) => {
-                                try {
-                                    await createTodo(formData);
-
-                                    toast.success("Task added successfully ✅");
-
-                                    setIsAddTaskOpen(false);
-                                } catch (err) {
-                                    toast.error("Failed to add task ❌");
-                                }
-                            }}
-                        >
-                            <DialogHeader className="mb-6">
-                                <DialogTitle>New Task</DialogTitle>
-                            </DialogHeader>
-
-                            <div className="space-y-2 mb-4">
-                                <Label htmlFor="title">Title</Label>
-                                <Input id="title" name="title" placeholder="Task title" autoFocus />
-                            </div>
-                            <div className="space-y-2 mb-4">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea id="description" name="description" placeholder="Add details..." className="resize-none" />
-                            </div>
-                            <div className="space-y-2 mb-4">
-                                <Label>Due date</Label>
-
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            className="w-full justify-start text-left font-normal"
-                                        >
-                                            {dueDate
-                                                ? dueDate.toDateString()
-                                                : "Select a due date"
-                                            }
-                                        </Button>
-                                    </PopoverTrigger>
-
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={dueDate}
-                                            onSelect={(date) => {
-                                                if (date) setDueDate(date);
-                                            }}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                    <input
-                                        type="hidden"
-                                        name="dueDate"
-                                        value={dueDate ? dueDate.toISOString() : ""}
-                                    />
-                                </Popover>
-                            </div>
-                            <div className="space-y-2  mb-4">
-                                <Label>Priority</Label>
-
-                                <Popover open={isPriorityOpen} onOpenChange={setIsPriorityOpen}>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            className={`w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 ${selectedPriority?.color}`}
-                                        >
-                                            {selectedPriority?.label}
-                                        </Button>
-                                    </PopoverTrigger>
-
-                                    <PopoverContent className="w-48 p-1">
-                                        <div className="flex flex-col">
-                                            {priorities.map((p) => (
-                                                <button
-                                                    type="button"
-                                                    key={p.value}
-                                                    onClick={() => {
-                                                        setPriority(p.value)
-                                                        setIsPriorityOpen(false)
-                                                    }}
-                                                    className={`flex items-center justify-between px-3 py-2 rounded-md hover:bg-gray-100 ${p.color}`}
-                                                >
-                                                    <span>{p.label}</span>
-
-                                                    {priority === p.value && (
-                                                        <span className="text-xs">✓</span>
-                                                    )}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </PopoverContent>
-                                    <input type="hidden" name="priority" value={priority} />
-                                </Popover>
-                            </div>
-
-                            <DialogFooter>
-                                <Button className="cursor-pointer" variant="ghost" onClick={() => setIsAddTaskOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button 
-                                    type="submit"
-                                    className="bg-red-500 hover:bg-red-600 cursor-pointer"
-                                >
-                                    Add Task
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>  
-                </Dialog>
+                <AddTaskDialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}  />
+                
             </aside>
 
             <Button
