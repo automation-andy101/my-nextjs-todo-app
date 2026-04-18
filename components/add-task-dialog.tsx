@@ -17,7 +17,6 @@ export default function AddTaskDialog({
     onOpenChange: (open: boolean) => void;
 }) {
 
-    const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [dueDate, setDueDate] = useState<Date | undefined>();
     const [priority, setPriority] = useState(4);
     const [isPriorityOpen, setIsPriorityOpen] = useState(false);
@@ -135,7 +134,12 @@ export default function AddTaskDialog({
                     </div>
 
                     <DialogFooter>
-                        <Button className="cursor-pointer" variant="ghost" onClick={() => setIsAddTaskOpen(false)}>
+                        <Button
+                            type="button"
+                            className="cursor-pointer" 
+                            variant="ghost" 
+                            onClick={() => onOpenChange(false)}
+                        >
                             Cancel
                         </Button>
                         <Button 

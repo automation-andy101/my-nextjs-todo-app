@@ -4,10 +4,37 @@ import { useState } from "react";
 import { Button } from '@/components/ui/button';
 import AddTaskDialog from '@/components/add-task-dialog';
 import { CircleCheck, Circle, CirclePlus } from 'lucide-react';
+import { updateTodo } from "@/lib/actions/todo";
+import { useTransition } from "react";
 
 export default function TodayClient({ todos }: { todos: any[] }) {
-    
+    const [localTodos, setLocalTodos] = useState(todos);
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+    const [selectedTodo, setSelectedTodo] = useState<any>(null);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isPending, startTransition] = useTransition();
+
+    function handleToggleComplete(todo: any) {
+        // optimistic update
+        setLocalTodos((prev) =>
+            prev.map((t) =>
+                t._id === todo._id
+                    ? { ...t, completed: !t.completed }
+                    : t
+            )
+        );
+
+        startTransition(() => {
+            updateTodo(
+                todo._id, { completed: !todo.completed }
+            );
+        });
+    }
+
+    function handleDetailsOpen(todo: any) {
+        setSelectedTodo(todo);
+        setIsDetailsOpen(true);
+    }
 
     const today = new Date().toLocaleDateString("en-GB", {
         weekday: "long",
@@ -39,14 +66,23 @@ export default function TodayClient({ todos }: { todos: any[] }) {
 
                     {/* Tasks list */}
                     <div className="space-y-3">
-                        {todos.map((todo: any) => (
+                        {localTodos.map((todo: any) => (
                         <div
                             key={todo._id}
-                            className="flex items-center gap-3 cursor-pointer group"
+                            onClick={() => (handleDetailsOpen(todo))}
+                            className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 rounded px-2 py-1"
                         >
 
                             {/* Animated Circle */}
-                            <div className="w-6 h-6 flex items-center justify-center">
+                            <div 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleComplete(todo);
+                                }}
+                                className={`w-6 h-6 flex items-center justify-center ${
+                                    isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"
+                                }`}
+                            >
                                 {todo.completed ? (
                                     <CircleCheck className="w-6 h-6 text-green-500 transition-all duration-300 scale-100" />
                                 ) : (
@@ -56,7 +92,7 @@ export default function TodayClient({ todos }: { todos: any[] }) {
 
                             {/* Task text */}
                             <p
-                                className={`transition-all duration-300 ${
+                                className={`transition-all duration-300 cursor-pointer ${
                                     todo.completed
                                     ? "line-through text-gray-400"
                                     : "text-gray-700"

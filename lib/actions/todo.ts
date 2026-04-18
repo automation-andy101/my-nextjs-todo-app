@@ -64,3 +64,39 @@ export async function getTodaysTodos() {
     return JSON.parse(JSON.stringify(todos));
 }
 
+export async function updateTodo(
+        todoId: string, 
+        updates: {
+            completed?: boolean;
+            title?: string;
+            description?: string;
+            priority?: string;
+            dueDate?: Date;
+        }
+) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        throw new Error("Unauthorized");
+    }
+
+    await connectDB();
+
+    const todo = await Todo.findOneAndUpdate(
+        {
+            _id: todoId,
+            userId: session.user.id
+        },
+        updates,
+        { new: true } // brings back the updated todo
+    );
+
+    if (!todo) {
+        return { error: "Todo not found" };
+    }
+
+    revalidatePath("/today");
+
+    return JSON.parse(JSON.stringify(todo));
+}
+
