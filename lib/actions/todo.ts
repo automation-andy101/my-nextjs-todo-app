@@ -64,16 +64,15 @@ export async function getTodaysTodos() {
     return JSON.parse(JSON.stringify(todos));
 }
 
-export async function updateTodo(
-        todoId: string, 
-        updates: {
-            completed?: boolean;
-            title?: string;
-            description?: string;
-            priority?: string;
-            dueDate?: Date;
-        }
-) {
+type TodoUpdate = {
+    completed?: boolean;
+    title?: FormDataEntryValue | null;
+    description?: FormDataEntryValue | null;
+    priority?: FormDataEntryValue | null;
+    dueDate?: FormDataEntryValue | null;
+};
+
+export async function updateTodo(todoId: string,  updates: TodoUpdate) {
     const session = await getSession();
 
     if (!session?.user) {
@@ -82,12 +81,47 @@ export async function updateTodo(
 
     await connectDB();
 
+    let parsedPriority: number | undefined;
+    let parsedDueDate: Date | undefined;
+    
+    if (typeof updates.priority === "string") {
+        const num = Number(updates.priority);
+        if (!isNaN(num)) parsedPriority = num;
+    }
+
+    if (typeof updates.dueDate === "string") {
+        const d = new Date(updates.dueDate);
+        if (!isNaN(d.getTime())) parsedDueDate = d;
+    }
+
+    const updateData: any = {};
+
+    if (typeof updates.title === "string") {
+        updateData.title = updates.title;
+    }
+
+    if (typeof updates.description === "string") {
+        updateData.description = updates.description;
+    }
+
+    if (parsedDueDate !== undefined) {
+        updateData.dueDate = parsedDueDate;
+    }
+
+    if (parsedPriority !== undefined) {
+        updateData.priority = parsedPriority;
+    }
+
+    if (typeof updates.completed === "boolean") {
+        updateData.completed = updates.completed;
+    }
+
     const todo = await Todo.findOneAndUpdate(
         {
             _id: todoId,
             userId: session.user.id
         },
-        updates,
+        updateData,
         { new: true } // brings back the updated todo
     );
 

@@ -14,6 +14,8 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { updateTodo } from "@/lib/actions/todo";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Calendar } from './ui/calendar';
+import { toast } from "react-toastify";
 
 export default function TaskDetailDialog({
   todo,
@@ -24,15 +26,31 @@ export default function TaskDetailDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-    const [title, setTitle] = useState(todo?.title || "");
-    const [description, setDescription] = useState(todo?.description || "");
+
+    const [dueDate, setDueDate] = useState<Date | undefined>(
+        todo?.dueDate ? new Date(todo.dueDate) : undefined
+    );
+    const [priority, setPriority] = useState(todo?.priority);
+    const [isPriorityOpen, setIsPriorityOpen] = useState(false);
+    const [isDateOpen, setIsDateOpen] = useState(false);
+
+    const priorities = [
+        { value: 1, label: "Priority 1", color: "text-red-500" },
+        { value: 2, label: "Priority 2", color: "text-orange-500" },
+        { value: 3, label: "Priority 3", color: "text-blue-500" },
+        { value: 4, label: "Priority 4", color: "text-gray-500" },
+    ];
+
+    const selectedPriority =
+        priorities.find((p) => p.value === priority) ??
+        priorities[3];
 
     useEffect(() => {
-        if (todo) {
-            setTitle(todo.title || "");
-            setDescription(todo.description || "");
+        if (open && todo) {
+            setPriority(todo.priority);
+            setDueDate(todo.dueDate ? new Date(todo.dueDate) : undefined);
         }
-    }, [todo]);
+    }, [open, todo]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -40,18 +58,20 @@ export default function TaskDetailDialog({
                 <form
                     action={async (formData) => {
                         try {
-                            await updateTodo(
-                                todo._id, 
-                                { 
-                                    title: formData.get("title") as string,
-                                    description: formData.get("description") as string,
-                                    priority: formData.get("priority") as string,
-                                    dueDate: formData.get("dueDate") as Date
-                                }
-                            );
+                            await updateTodo(todo._id, {
+                                title: formData.get("title"),
+                                description: formData.get("description"),
+                                priority,
+                                dueDate: dueDate ? dueDate.toISOString() : undefined
+                            });
+                            
+                            toast.success("Task updated");
+                            onOpenChange(false);
+                            
                         } catch (err) {
-
+                            toast.success("Failed to update task");
                         }
+                        
                     }}
                 >
                     <DialogHeader>
@@ -62,8 +82,8 @@ export default function TaskDetailDialog({
                         <div>
                             <Label>Title</Label>
                             <Input
-                                value={title}
-                                defaultValue={todo?.description}
+                                name="title"
+                                defaultValue={todo?.title}
                             />
                         </div>
 
@@ -109,7 +129,39 @@ export default function TaskDetailDialog({
                                         ))}
                                     </div>
                                 </PopoverContent>
-                                <input type="hidden" name="priority" value={priority} />
+                            </Popover>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                            <Label>Due date</Label>
+    
+                            <Popover open={isDateOpen} onOpenChange={setIsDateOpen}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full justify-start text-left font-normal"
+                                    >
+                                        {dueDate
+                                            ? dueDate.toDateString()
+                                            : "Select a due date"
+                                        }
+                                    </Button>
+                                </PopoverTrigger>
+    
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={dueDate}
+                                        onSelect={(date) => {
+                                            if (date) {
+                                                setDueDate(date);
+                                                setIsDateOpen(false);
+                                            }
+                                        }}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                                
                             </Popover>
                         </div>
                     </div>
@@ -123,7 +175,9 @@ export default function TaskDetailDialog({
                             Close
                         </Button>
 
-                        <Button>
+                        <Button
+                            type="submit"
+                        >
                             Save Changes
                         </Button>
                     </DialogFooter>
