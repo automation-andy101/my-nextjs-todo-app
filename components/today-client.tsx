@@ -6,6 +6,7 @@ import AddTaskDialog from '@/components/add-task-dialog';
 import { CircleCheck, Circle, CirclePlus } from 'lucide-react';
 import { updateTodo } from "@/lib/actions/todo";
 import { useTransition } from "react";
+import TaskDetailDialog from "./task-detail-dialog";
 
 export default function TodayClient({ todos }: { todos: any[] }) {
     const [localTodos, setLocalTodos] = useState(todos);
@@ -116,6 +117,12 @@ export default function TodayClient({ todos }: { todos: any[] }) {
                     </Button>
 
                     <AddTaskDialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen} />
+
+                    <TaskDetailDialog
+                        todo={selectedTodo}
+                        open={isDetailsOpen}
+                        onOpenChange={setIsDetailsOpen}
+                    />
                 </div>
             </div>
         </div>
