@@ -6,6 +6,6 @@ export default async function Page() {
   const todos = await getUpcomingTodos();
 
   return (
-    <UpcomingClient todos={todos} />
+    <UpcomingClient groupedTodos={todos} />
   );
 }

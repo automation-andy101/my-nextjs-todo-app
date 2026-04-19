@@ -43,20 +43,34 @@ export async function getUpcomingTodos() {
     await connectDB();
 
     const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
 
-    const start = tomorrow.setHours(0, 0, 0, 0);
+    const start = new Date(today);
+    start.setDate(today.getDate() + 1);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(today);
+    end.setDate(start.getDate() + 7)
+    end.setHours(23, 59, 59, 999);
 
     const todos = await Todo.find({
         userId: session.user.id,
         dueDate: {
-            $gte: start
+            $gte: start,
+            $lte: end
         }
     }).sort({ dueDate: 1 });
 
-    return JSON.parse(JSON.stringify(todos));
+    const grouped: Record<string, any[]> = {}
 
+    for (const todo of todos) {
+        // const key = new Date(todo.dueDate).toDateString();
+        const key = new Date(todo.dueDate).toISOString().split("T")[0];
+
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(JSON.parse(JSON.stringify(todo)));
+    }
+
+    return grouped;
 }
 
 export async function getTodaysTodos() {
@@ -92,10 +106,10 @@ export async function getTodaysTodos() {
 
 type TodoUpdate = {
     completed?: boolean;
-    title?: FormDataEntryValue | null;
-    description?: FormDataEntryValue | null;
-    priority?: FormDataEntryValue | null;
-    dueDate?: FormDataEntryValue | null;
+    title?: string;
+    description?: string;
+    priority?: number;
+    dueDate?: string | Date;
 };
 
 export async function updateTodo(todoId: string,  updates: TodoUpdate) {
@@ -110,12 +124,16 @@ export async function updateTodo(todoId: string,  updates: TodoUpdate) {
     let parsedPriority: number | undefined;
     let parsedDueDate: Date | undefined;
     
-    if (typeof updates.priority === "string") {
+    if (typeof updates.priority === "number") {
+        parsedPriority = updates.priority;
+    } else if (typeof updates.priority === "string") {
         const num = Number(updates.priority);
         if (!isNaN(num)) parsedPriority = num;
     }
 
-    if (typeof updates.dueDate === "string") {
+    if (updates.dueDate instanceof Date) {
+        parsedDueDate = updates.dueDate;
+    } else if (typeof updates.dueDate === "string") {
         const d = new Date(updates.dueDate);
         if (!isNaN(d.getTime())) parsedDueDate = d;
     }
