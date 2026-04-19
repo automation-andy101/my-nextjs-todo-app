@@ -107,7 +107,10 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                 </nav>
 
                 { /* Add Todo dialog popup */ }
-                <AddTaskDialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}  />
+                <AddTaskDialog 
+                    open={isAddTaskOpen} 
+                    onOpenChange={setIsAddTaskOpen}  
+                />
                 
             </aside>
 

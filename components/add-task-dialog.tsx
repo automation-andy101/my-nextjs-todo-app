@@ -11,16 +11,19 @@ import { toast } from "react-toastify";
 
 export default function AddTaskDialog({
     open,
-    onOpenChange
+    onOpenChange,
+    onUpdate
 }: {
     open: boolean,
     onOpenChange: (open: boolean) => void;
+    onUpdate?: (newTodo: any) => void;
 }) {
 
     const [dueDate, setDueDate] = useState<Date | undefined>();
     const [priority, setPriority] = useState(4);
     const [isPriorityOpen, setIsPriorityOpen] = useState(false);
     const [isDateOpen, setIsDateOpen] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(false);
 
     const priorities = [
         { value: 1, label: "Priority 1", color: "text-red-500" },
@@ -37,7 +40,11 @@ export default function AddTaskDialog({
                 <form
                     action={async (formData) => {
                         try {
-                            await createTodo(formData);
+                            const todo = await createTodo(formData);
+
+                            if (onUpdate) {
+                                onUpdate(todo);
+                            }
 
                             toast.success("Task added successfully ✅");
 

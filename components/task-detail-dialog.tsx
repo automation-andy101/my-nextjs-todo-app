@@ -16,17 +16,25 @@ import { updateTodo } from "@/lib/actions/todo";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from './ui/calendar';
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import { Circle, CircleCheck } from "lucide-react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export default function TaskDetailDialog({
   todo,
   open,
   onOpenChange,
+  onUpdate
 }: {
   todo: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUpdate: (updatedTodo: any) => void
 }) {
 
+    if (!open || !todo) return null;
+
+    const [completed, setCompleted] = useState(todo?.completed);
     const [dueDate, setDueDate] = useState<Date | undefined>(
         todo?.dueDate ? new Date(todo.dueDate) : undefined
     );
@@ -49,8 +57,11 @@ export default function TaskDetailDialog({
         if (open && todo) {
             setPriority(todo.priority);
             setDueDate(todo.dueDate ? new Date(todo.dueDate) : undefined);
+            setCompleted(todo.completed);
         }
     }, [open, todo]);
+
+    const router = useRouter();
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -58,15 +69,19 @@ export default function TaskDetailDialog({
                 <form
                     action={async (formData) => {
                         try {
-                            await updateTodo(todo._id, {
+                            const updated = await updateTodo(todo._id, {
                                 title: formData.get("title"),
                                 description: formData.get("description"),
                                 priority,
-                                dueDate: dueDate ? dueDate.toISOString() : undefined
+                                dueDate: dueDate ? dueDate.toISOString() : undefined,
+                                completed
                             });
                             
+                            onUpdate(updated);
+
                             toast.success("Task updated");
                             onOpenChange(false);
+                            router.refresh();
 
                         } catch (err) {
                             toast.success("Failed to update task");
@@ -74,11 +89,30 @@ export default function TaskDetailDialog({
                         
                     }}
                 >
-                    {/* <DialogHeader>
-                        <DialogTitle>Task Details</DialogTitle>
-                    </DialogHeader> */}
+                    <DialogHeader>
+                        <VisuallyHidden>
+                            <DialogTitle>Task Details</DialogTitle>
+                        </VisuallyHidden>
+                    </DialogHeader>
 
-                    <div className="space-y-4 mb-2">
+                    <div className="flex items-center gap-3 mb-4">
+                        <button
+                            type="button"
+                            onClick={() => setCompleted(!completed)}
+                            className="flex items-center gap-2  cursor-pointer"
+                        >
+                            {completed ? (
+                                <CircleCheck className="w-6 h-6 text-green-500" />
+                            ) : (
+                                <Circle className="w-6 h-6 text-gray-400" />
+                            )}
+                            <span className="text-sm text-gray-600">
+                                {completed ? "Completed" : "Incomplete"}
+                            </span>
+                        </button>
+                    </div>
+
+                    <div className="space-y-4 mb-4">
                         <Label>Title</Label>
                         <Input
                             name="title"
@@ -169,12 +203,14 @@ export default function TaskDetailDialog({
                             type="button"
                             variant="ghost"
                             onClick={() => onOpenChange(false)}
+                            className="cursor-pointer"
                         >
                             Close
                         </Button>
 
                         <Button
                             type="submit"
+                            className="cursor-pointer"
                         >
                             Save Changes
                         </Button>

@@ -1,9 +1,11 @@
-import React from 'react'
+import UpcomingClient from '@/components/upcoming-client';
+import { getUpcomingTodos } from '@/lib/actions/todo';
 
-const page = () => {
+export default async function Page() {
+  
+  const todos = await getUpcomingTodos();
+
   return (
-    <div>Upcoming page</div>
-  )
+    <UpcomingClient todos={todos} />
+  );
 }
-
-export default page

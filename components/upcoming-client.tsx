@@ -8,7 +8,7 @@ import { updateTodo } from "@/lib/actions/todo";
 import { useTransition } from "react";
 import TaskDetailDialog from "./task-detail-dialog";
 
-export default function TodayClient({ todos }: { todos: any[] }) {
+export default function UpcomingClient({ todos }: { todos: any[] }) {
     const [localTodos, setLocalTodos] = useState(todos);
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [selectedTodo, setSelectedTodo] = useState<any>(null);

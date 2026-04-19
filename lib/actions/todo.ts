@@ -33,6 +33,32 @@ export async function createTodo(formData: FormData) {
     revalidatePath("/");
 }
 
+export async function getUpcomingTodos() {
+    const session = await getSession();
+
+    if (!session?.user) {
+        throw new Error("Unauthorized");
+    }
+
+    await connectDB();
+
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const start = tomorrow.setHours(0, 0, 0, 0);
+
+    const todos = await Todo.find({
+        userId: session.user.id,
+        dueDate: {
+            $gte: start
+        }
+    }).sort({ dueDate: 1 });
+
+    return JSON.parse(JSON.stringify(todos));
+
+}
+
 export async function getTodaysTodos() {
     const session = await getSession();
 
