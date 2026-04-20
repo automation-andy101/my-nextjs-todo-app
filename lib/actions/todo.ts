@@ -31,6 +31,8 @@ export async function createTodo(formData: FormData) {
     });
 
     revalidatePath("/");
+
+    return JSON.parse(JSON.stringify(todo));
 }
 
 export async function getUpcomingTodos() {
@@ -63,8 +65,8 @@ export async function getUpcomingTodos() {
     const grouped: Record<string, any[]> = {}
 
     for (const todo of todos) {
-        // const key = new Date(todo.dueDate).toDateString();
-        const key = new Date(todo.dueDate).toISOString().split("T")[0];
+        const date = new Date(todo.dueDate);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
         if (!grouped[key]) grouped[key] = [];
         grouped[key].push(JSON.parse(JSON.stringify(todo)));

@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from '@/components/ui/button';
 import AddTaskDialog from '@/components/add-task-dialog';
 import { CircleCheck, Circle, CirclePlus } from 'lucide-react';
 import { updateTodo } from "@/lib/actions/todo";
 import { useTransition } from "react";
 import TaskDetailDialog from "./task-detail-dialog";
-
+import { useRouter } from "next/navigation";
 
 export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<string, any[]> }) {
     const [localTodos, setLocalTodos] = useState(groupedTodos);
@@ -17,6 +17,47 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
     const [isPending, startTransition] = useTransition();
 
     const totalTasks = Object.values(localTodos).flat().length;
+
+    const router = useRouter();
+
+    useEffect(() => {
+        function scheduleRefresh() {
+            const now = new Date();
+
+            const msUntilMidnight =
+                new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate() + 1
+                ).getTime() - now.getTime();
+
+            const timer = setTimeout(() => {
+                router.refresh();
+                scheduleRefresh(); 
+            }, msUntilMidnight);
+
+            return timer;
+        }
+
+        const timer = scheduleRefresh();
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        setLocalTodos(groupedTodos);
+    }, [groupedTodos]);
+
+    function isToday(dateStr: string) {
+        const today = new Date();
+        const d = new Date(dateStr);
+
+        return (
+            d.getFullYear() === today.getFullYear() &&
+            d.getMonth() === today.getMonth() &&
+            d.getDate() === today.getDate()
+        );
+    }
 
     function handleToggleComplete(todo: any) {
         setLocalTodos(prev => {
@@ -74,7 +115,9 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
 
                     {/* Tasks list */}
                     <div className="space-y-3">
-                        {Object.entries(localTodos).map(([date, todos]) => (
+                        {Object.entries(localTodos)
+                            .filter(([date]) => !isToday(date))
+                            .map(([date, todos]) => (
                             <div key={date} className="mb-12">
                                 {/* Date heading */}
                                 <h2 className="text-xl font-semibold text-black mb-2">
@@ -140,7 +183,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                         open={isAddTaskOpen} 
                         onOpenChange={setIsAddTaskOpen}
                         onUpdate={(newTodo) => {
-                            const key = new Date(newTodo.dueDate).toDateString();
+                            const key = new Date(newTodo.dueDate).toISOString().split("T")[0];
 
                             setLocalTodos(prev => ({
                                 ...prev,
