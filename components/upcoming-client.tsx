@@ -16,6 +16,36 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
 
+    const [startDate, setStartDate] = useState(() => {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        now.setDate(now.getDate());
+
+        return now;
+    });
+
+    const [endDate, setEndDate] = useState(() => {
+        const d = new Date(startDate);
+        d.setHours(23, 59, 59, 999);
+        d.setDate(d.getDate() + 6); // 7-day window
+
+        return d;
+    });
+
+    function shiftRange(days: number) {
+        setStartDate(prev => {
+            const newStart = new Date(prev);
+            newStart.setDate(newStart.getDate() + days);
+
+            const newEnd = new Date(newStart);
+            newEnd.setDate(newEnd.getDate() + 6);
+
+            setEndDate(newEnd);
+
+            return newStart;
+        });
+    }
+
     const totalTasks = Object.values(localTodos).flat().length;
 
     const router = useRouter();
@@ -97,16 +127,44 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
         });
     } 
      
-
     return (
         <div className="min-h-screen bg-white mt-6">
             <div className="container mx-auto p-6">
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-black">Upcoming</h1>
 
-                    <div className="flex flex-row items-center gap-2 mt-4">
+                    {/* <div className="flex flex-row items-center gap-2 mt-4">
                         <CircleCheck className="w-4 h-4 text-gray-600" />
                         <p className="text-gray-600">{totalTasks} Tasks</p>
+                    </div> */}
+
+                    <div className="flex items-center justify-between mb-6">
+                        <button
+                            onClick={() => shiftRange(-7)}
+                            className="p-2 hover:bg-gray-100 rounded"
+                        >
+                            ←
+                        </button>
+
+                        <div className="text-sm font-medium">
+                            {startDate.toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "short"
+                            })}{" "}
+                            -{" "}
+                            {endDate.toLocaleDateString("en-GB", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric"
+                            })}
+                        </div>
+
+                        <button
+                            onClick={() => shiftRange(7)}
+                            className="p-2 hover:bg-gray-100 rounded"
+                        >
+                            →
+                        </button>
                     </div>
                 </div>
 

@@ -75,6 +75,43 @@ export async function getUpcomingTodos() {
     return grouped;
 }
 
+export async function getUpcomingTodosBetweenDays(startDate: string, endDate: string) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        throw new Error("Unauthorized");
+    }
+
+    await connectDB();
+
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const todos = await Todo.find({
+        userId: session.user.id,
+        dueDate: {
+            $gte: start,
+            $lte: end
+        }
+    }).sort({ dueDate: 1 });
+
+    const grouped: Record<string, any[]> = {};
+
+    for (const todo of todos) {
+        const date = new Date(todo.dueDate);
+
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(JSON.parse(JSON.stringify(todo)));
+    }
+
+    return grouped;
+}
+
 export async function getTodaysTodos() {
     const session = await getSession();
 
