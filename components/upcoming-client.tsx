@@ -8,6 +8,7 @@ import { updateTodo } from "@/lib/actions/todo";
 import { useTransition } from "react";
 import TaskDetailDialog from "./task-detail-dialog";
 import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<string, any[]> }) {
     const [localTodos, setLocalTodos] = useState(groupedTodos);
@@ -15,13 +16,12 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
     const [selectedTodo, setSelectedTodo] = useState<any>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
+    const [currentDate, setCurrentDate] = useState(new Date());
 
     const [startDate, setStartDate] = useState(() => {
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        now.setDate(now.getDate());
+        const d = getStartOfWeek(currentDate);
 
-        return now;
+        return d;
     });
 
     const [endDate, setEndDate] = useState(() => {
@@ -31,6 +31,37 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
 
         return d;
     });
+
+    function getStartOfWeek(date: Date) {
+        const d = new Date(date);
+        const day = d.getDay(); // 0 = Sunday
+
+        d.setDate(d.getDate() - day);
+        d.setHours(0, 0, 0, 0);
+
+        return d;
+    }
+
+    const days = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + i);
+
+        return d;
+    });
+
+    function formatHeaderDate(date: Date) {
+        return date.toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "long"
+        });
+    }
+
+    function formatDayLabel(date: Date) {
+        return date.toLocaleDateString("en-GB", {
+            weekday: "short",
+            day: "numeric"
+        });
+    }
 
     function shiftRange(days: number) {
         setStartDate(prev => {
@@ -46,8 +77,33 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
         });
     }
 
-    const totalTasks = Object.values(localTodos).flat().length;
+    function goNextWeek() {
+        setCurrentDate(prev => {
+            const d = new Date(prev);
+            d.setDate(d.getDate() + 7);
 
+            return d;
+        });
+    }
+
+    function goPrevWeek() {
+        setCurrentDate(prev => {
+            const d = new Date(prev);
+            d.setDate(d.getDate() - 7);
+
+            return d;
+        });
+    }
+
+    function goToMonth(monthIndex: number) {
+        setCurrentDate(prev => {
+            const d = new Date(prev);
+            d.setMonth(monthIndex);
+
+            return d;
+        });
+    }
+    
     const router = useRouter();
 
     useEffect(() => {
@@ -131,40 +187,77 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
         <div className="min-h-screen bg-white mt-6">
             <div className="container mx-auto p-6">
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-black">Upcoming</h1>
+                    <h1 className="text-3xl font-bold text-black mb-6">Upcoming</h1>
 
-                    {/* <div className="flex flex-row items-center gap-2 mt-4">
-                        <CircleCheck className="w-4 h-4 text-gray-600" />
-                        <p className="text-gray-600">{totalTasks} Tasks</p>
-                    </div> */}
+                    <div className="flex flex-col gap-4 mb-6">
 
-                    <div className="flex items-center justify-between mb-6">
-                        <button
-                            onClick={() => shiftRange(-7)}
-                            className="p-2 hover:bg-gray-100 rounded"
-                        >
-                            ←
-                        </button>
+                        {/* Top Bar */}
+                        <div className="flex items-center justify-between w-full">
 
-                        <div className="text-sm font-medium">
-                            {startDate.toLocaleDateString("en-GB", {
-                                day: "numeric",
-                                month: "short"
-                            })}{" "}
-                            -{" "}
-                            {endDate.toLocaleDateString("en-GB", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric"
-                            })}
+                            {/* Month Dropdown */}
+                            <div className="flex items-center justify-between">
+                                <select
+                                    onChange={(e) => goToMonth(Number(e.target.value))}
+                                    className="border rounded px-2 py-1 text-sm"
+                                    value={currentDate.getMonth()}
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => (
+                                        <option key={i} value={i}>
+                                            {new Date(0, i).toLocaleString("en-GB", { month: "long" })}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div className="flex gap-2">
+                                {/* Left Arrow */}
+                                <button
+                                    onClick={goPrevWeek}
+                                    className="p-2 rounded hover:bg-gray-100"
+                                >
+                                    <ChevronLeft className="w-5 h-5" />
+                                </button>
+
+
+                                {/* Right Arrow */}
+                                <button
+                                    onClick={goNextWeek}
+                                    className="p-2 rounded hover:bg-gray-100"
+                                >
+                                    <ChevronRight className="w-5 h-5" />
+                                </button>
+
+                            </div>
+                            
                         </div>
 
-                        <button
-                            onClick={() => shiftRange(7)}
-                            className="p-2 hover:bg-gray-100 rounded"
-                        >
-                            →
-                        </button>
+                        {/* 7-Day Strip */}
+                        <div className="flex gap-16">
+
+                            {days.map((day) => {
+                                const isSelected = day.toDateString() === currentDate.toDateString();
+
+                                return (
+                                    <button
+                                        key={day.toISOString()}
+                                        onClick={() => setCurrentDate(day)}
+                                        className={`flex flex-col gap-3 items-center p-2 rounded-md w-full transition ${
+                                            isSelected
+                                            ? "bg-black text-white"
+                                            : "hover:bg-gray-100 text-gray-700"
+                                        }`}
+                                    >
+                                        <span className="text-xs">
+                                            {day.toLocaleDateString("en-GB", { weekday: "short" })}
+                                        </span>
+
+                                        <span className="text-sm font-medium">
+                                            {day.getDate()}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
@@ -176,68 +269,77 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                         {Object.entries(localTodos)
                             .filter(([date]) => !isToday(date))
                             .map(([date, todos]) => (
-                            <div key={date} className="mb-12">
-                                {/* Date heading */}
-                                <h2 className="text-xl font-semibold text-black mb-2">
-                                    {formatDate(date)}
-                                </h2>
-                                
-                                {/* Divider line */}
-                                <div className="border-b-2 border-black mt-2 mb-6 w-[280%]"></div> 
+                                <>
+                                    <div key={date} className="mb-4">
+                                        {/* Date heading */}
+                                        <h2 className="text-xl font-semibold text-black mb-2">
+                                            {formatDate(date)}
+                                        </h2>
+                                        
+                                        {/* Divider line */}
+                                        <div className="border-b-2 border-black mt-2 mb-6 w-[140%]"></div> 
 
-                                <div className="space-y-3">
-                                    {todos.map((todo: any) => (
-                                        <div
-                                            key={todo._id}
-                                            onClick={() => handleDetailsOpen(todo)}
-                                            className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 rounded px-2 py-1"
-                                        >
-                                            <div
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleToggleComplete(todo);
-                                                }}
-                                                className={`w-6 h-6 flex items-center justify-center ${
-                                                    isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"
-                                                }`}
-                                            >
-                                                {todo.completed ? (
-                                                    <CircleCheck className="w-6 h-6 text-green-500" />
-                                                    ) : (
-                                                    <Circle className="w-6 h-6 text-gray-400 group-hover:scale-110" />
-                                                    )
-                                                }
-                                            </div>
+                                        <div className="space-y-3">
+                                            {todos.map((todo: any) => (
+                                                <div
+                                                    key={todo._id}
+                                                    onClick={() => handleDetailsOpen(todo)}
+                                                    className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 rounded px-2 py-1"
+                                                >
+                                                    <div
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleToggleComplete(todo);
+                                                        }}
+                                                        className={`w-6 h-6 flex items-center justify-center ${
+                                                            isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"
+                                                        }`}
+                                                    >
+                                                        {todo.completed ? (
+                                                            <CircleCheck className="w-6 h-6 text-green-500" />
+                                                            ) : (
+                                                            <Circle className="w-6 h-6 text-gray-400 group-hover:scale-110" />
+                                                            )
+                                                        }
+                                                    </div>
 
-                                            <p
-                                                className={`transition-all duration-300 ${
-                                                todo.completed
-                                                    ? "line-through text-gray-400"
-                                                    : "text-gray-700"
-                                                }`}
-                                            >
-                                                {todo.title}
-                                            </p>
+                                                    <p
+                                                        className={`transition-all duration-300 ${
+                                                        todo.completed
+                                                            ? "line-through text-gray-400"
+                                                            : "text-gray-700"
+                                                        }`}
+                                                    >
+                                                        {todo.title}
+                                                    </p>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                            
+                                    </div>
+                                    <Button 
+                                        variant="ghost"
+                                        onClick={() => setIsAddTaskOpen(true)}
+                                        className="text-red-500 font-semibold justify-start w-full cursor-pointer mb-8"    
+                                    >
+                                        <CirclePlus size={18} />
+                                        <span>Add task</span>
+                                    </Button>
+                                </>
                         ))} 
                     </div>
                 </div>
 
                 <div className="mb-6">
-                    <Button 
+                    {/* <Button 
                         variant="ghost"
                         onClick={() => setIsAddTaskOpen(true)}
                         className="text-red-500 font-semibold justify-start w-full cursor-pointer"    
                     >
                         <CirclePlus size={18} />
                         <span>Add task</span>
-                    </Button>
+                    </Button> */}
 
-                    <AddTaskDialog 
+                    {/* <AddTaskDialog 
                         open={isAddTaskOpen} 
                         onOpenChange={setIsAddTaskOpen}
                         onUpdate={(newTodo) => {
@@ -248,7 +350,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                 [key]: [newTodo, ...(prev[key] || [])]
                             }));
                         }}
-                    />
+                    /> */}
 
                     <TaskDetailDialog
                         todo={selectedTodo}

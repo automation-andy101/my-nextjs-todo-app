@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from '@/components/ui/button';
 import AddTaskDialog from '@/components/add-task-dialog';
 import { CircleCheck, Circle, CirclePlus } from 'lucide-react';
 import { updateTodo } from "@/lib/actions/todo";
 import { useTransition } from "react";
 import TaskDetailDialog from "./task-detail-dialog";
+import { useRouter } from "next/navigation";
 
 export default function TodayClient({ todos }: { todos: any[] }) {
     const [localTodos, setLocalTodos] = useState(todos);
@@ -45,6 +46,32 @@ export default function TodayClient({ todos }: { todos: any[] }) {
         month: "long",
         year: "numeric"
     });
+
+    const router = useRouter();
+    
+        useEffect(() => {
+            function scheduleRefresh() {
+                const now = new Date();
+    
+                const msUntilMidnight =
+                    new Date(
+                        now.getFullYear(),
+                        now.getMonth(),
+                        now.getDate() + 1
+                    ).getTime() - now.getTime();
+    
+                const timer = setTimeout(() => {
+                    router.refresh();
+                    scheduleRefresh(); 
+                }, msUntilMidnight);
+    
+                return timer;
+            }
+    
+            const timer = scheduleRefresh();
+    
+            return () => clearTimeout(timer);
+        }, []);
 
     return (
         <div className="min-h-screen bg-white mt-6">
