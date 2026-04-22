@@ -209,7 +209,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                 </select>
                             </div>
                             
-                            <div className="flex gap-2">
+                            <div className="flex gap-4">
                                 {/* Left Arrow */}
                                 <button
                                     onClick={goPrevWeek}
@@ -258,11 +258,14 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                 );
                             })}
                         </div>
+
+                        {/* Divider line */}
+                        <div className="border-b-2 border-gray mt-2 mb-2 w-[140%]"></div> 
                     </div>
                 </div>
 
                 {/* Date */}
-                <div className="mb-6 mt-10">
+                <div className="mb-6 mt-6">
 
                     {/* Tasks list */}
                     <div className="space-y-3">
@@ -339,7 +342,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                         <span>Add task</span>
                     </Button> */}
 
-                    {/* <AddTaskDialog 
+                    <AddTaskDialog 
                         open={isAddTaskOpen} 
                         onOpenChange={setIsAddTaskOpen}
                         onUpdate={(newTodo) => {
@@ -350,7 +353,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                 [key]: [newTodo, ...(prev[key] || [])]
                             }));
                         }}
-                    /> */}
+                    />
 
                     <TaskDetailDialog
                         todo={selectedTodo}
