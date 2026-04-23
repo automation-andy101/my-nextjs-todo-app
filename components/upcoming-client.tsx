@@ -9,6 +9,7 @@ import { useTransition } from "react";
 import TaskDetailDialog from "./task-detail-dialog";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<string, any[]> }) {
     const [localTodos, setLocalTodos] = useState(groupedTodos);
@@ -16,21 +17,15 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
     const [selectedTodo, setSelectedTodo] = useState<any>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
-    const [currentDate, setCurrentDate] = useState(new Date());
 
-    const [startDate, setStartDate] = useState(() => {
-        const d = getStartOfWeek(currentDate);
+    const searchParams = useSearchParams();
+    const startParam = searchParams.get("start");
 
-        return d;
-    });
+    const currentDate = startParam
+        ? new Date(startParam)
+        : new Date();
 
-    const [endDate, setEndDate] = useState(() => {
-        const d = new Date(startDate);
-        d.setHours(23, 59, 59, 999);
-        d.setDate(d.getDate() + 6); // 7-day window
-
-        return d;
-    });
+    const startDate = getStartOfWeek(currentDate);
 
     function getStartOfWeek(date: Date) {
         const d = new Date(date);
@@ -63,46 +58,36 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
         });
     }
 
-    function shiftRange(days: number) {
-        setStartDate(prev => {
-            const newStart = new Date(prev);
-            newStart.setDate(newStart.getDate() + days);
-
-            const newEnd = new Date(newStart);
-            newEnd.setDate(newEnd.getDate() + 6);
-
-            setEndDate(newEnd);
-
-            return newStart;
-        });
+    function formatDateToNoneUtc(date: Date) {
+        return date.toISOString().split("T")[0]; // YYYY-MM-DD
     }
 
     function goNextWeek() {
-        setCurrentDate(prev => {
-            const d = new Date(prev);
-            d.setDate(d.getDate() + 7);
+        const next = new Date(currentDate);
+        next.setDate(next.getDate() + 7);
 
-            return d;
-        });
+        const start = getStartOfWeek(next);
+
+        router.push(`/upcoming?start=${formatDateToNoneUtc(start)}`);
     }
 
     function goPrevWeek() {
-        setCurrentDate(prev => {
-            const d = new Date(prev);
-            d.setDate(d.getDate() - 7);
+        const prev = new Date(currentDate);
+        prev.setDate(prev.getDate() - 7);
 
-            return d;
-        });
+        const start = getStartOfWeek(prev);
+
+        router.push(`/upcoming?start=${formatDateToNoneUtc(start)}`);
     }
 
-    function goToMonth(monthIndex: number) {
-        setCurrentDate(prev => {
-            const d = new Date(prev);
-            d.setMonth(monthIndex);
+    // function goToMonth(monthIndex: number) {
+    //     setCurrentDate(prev => {
+    //         const d = new Date(prev);
+    //         d.setMonth(monthIndex);
 
-            return d;
-        });
-    }
+    //         return d;
+    //     });
+    // }
     
     const router = useRouter();
 
@@ -197,7 +182,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                             {/* Month Dropdown */}
                             <div className="flex items-center justify-between">
                                 <select
-                                    onChange={(e) => goToMonth(Number(e.target.value))}
+                                    // onChange={(e) => goToMonth(Number(e.target.value))}
                                     className="border rounded px-2 py-1 text-sm"
                                     value={currentDate.getMonth()}
                                 >
@@ -240,7 +225,10 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                 return (
                                     <button
                                         key={day.toISOString()}
-                                        onClick={() => setCurrentDate(day)}
+                                        onClick={() => {
+                                            const start = getStartOfWeek(day);
+                                            router.push(`/upcoming?start=${formatDateToNoneUtc(start)}`)
+                                        }}
                                         className={`flex flex-col gap-3 items-center p-2 rounded-md w-full transition ${
                                             isSelected
                                             ? "bg-black text-white"

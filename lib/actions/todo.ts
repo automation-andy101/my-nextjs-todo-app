@@ -75,7 +75,7 @@ export async function getUpcomingTodos() {
     return grouped;
 }
 
-export async function getUpcomingTodosBetweenDays(startDate: string, endDate: string) {
+export async function getUpcomingTodosBetweenDays(startDate: Date, endDate: Date) {
     const session = await getSession();
 
     if (!session?.user) {
