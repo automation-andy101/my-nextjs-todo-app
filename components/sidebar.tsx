@@ -46,14 +46,40 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
             > 
                 <nav className="flex flex-col gap-4">
                     <div className="flex flex-row items-center justify-between pt-3 mb-4">
-                        <DropdownMenu>
+                        <DropdownMenu
+                            onOpenChange={(open) => {
+                                if (!open) {
+                                setTimeout(() => {
+                                    (document.activeElement as HTMLElement)?.blur();
+                                }, 0);
+                                }
+                            }}
+                        >
                             <DropdownMenuTrigger
                                 className="w-full flex items-center gap-3 justify-start px-2 py-2 cursor-pointer focus-visible:ring-0 focus-visible:outline-none"
                                 asChild
                             >
                                 <Button
                                     variant="ghost"
-                                    className="w-full flex items-center gap-3 justify-start px-2 py-2 cursor-pointer"
+                                    className="
+                                        w-full flex items-center gap-3 justify-start px-2 py-2 cursor-pointer
+
+                                        focus:outline-none
+                                        focus-visible:outline-none
+
+                                        focus:ring-0
+                                        focus-visible:ring-0
+
+                                        data-[state=open]:ring-0
+                                        data-[state=open]:outline-none
+
+                                        outline-none
+                                        focus:outline-none
+                                        focus-visible:outline-none
+                                        ring-0
+                                        focus:ring-0
+                                        focus-visible:ring-0
+                                    "
                                 >
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-8 w-8">

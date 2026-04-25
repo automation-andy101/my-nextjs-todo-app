@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Button } from '@/components/ui/button';
 import AddTaskDialog from '@/components/add-task-dialog';
 import { CircleCheck, Circle, CirclePlus } from 'lucide-react';
@@ -10,22 +10,37 @@ import TaskDetailDialog from "./task-detail-dialog";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<string, any[]> }) {
     const [localTodos, setLocalTodos] = useState(groupedTodos);
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [selectedTodo, setSelectedTodo] = useState<any>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    // const [selectedDate, setSelectedDate] = useState(new Date());
     const [isPending, startTransition] = useTransition();
 
     const searchParams = useSearchParams();
     const startParam = searchParams.get("start");
 
-    const currentDate = startParam
-        ? new Date(startParam)
-        : new Date();
+    const currentDate = useMemo(() => {
+        return startParam
+            ? new Date(startParam + "T00:00:00")
+            : new Date();
+    }, [startParam]);
 
-    const startDate = getStartOfWeek(currentDate);
+    const startDate = useMemo(() => {
+        return getStartOfWeek(currentDate);
+    }, [currentDate]);
+
+    const days = useMemo(() => {
+        return Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(startDate);
+            d.setDate(d.getDate() + i);
+            
+            return d;
+        });
+    }, [startDate]);
 
     function getStartOfWeek(date: Date) {
         const d = new Date(date);
@@ -36,13 +51,6 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
 
         return d;
     }
-
-    const days = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(startDate);
-        d.setDate(d.getDate() + i);
-
-        return d;
-    });
 
     function formatHeaderDate(date: Date) {
         return date.toLocaleDateString("en-GB", {
@@ -62,13 +70,22 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
         return date.toISOString().split("T")[0]; // YYYY-MM-DD
     }
 
+    function formatDateLocal(date: Date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    }
+
     function goNextWeek() {
         const next = new Date(currentDate);
         next.setDate(next.getDate() + 7);
 
         const start = getStartOfWeek(next);
+        // setSelectedDate(next);
 
-        router.push(`/upcoming?start=${formatDateToNoneUtc(start)}`);
+        router.push(`/upcoming?start=${formatDateLocal(start)}`);
     }
 
     function goPrevWeek() {
@@ -77,17 +94,17 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
 
         const start = getStartOfWeek(prev);
 
-        router.push(`/upcoming?start=${formatDateToNoneUtc(start)}`);
+        router.push(`/upcoming?start=${formatDateLocal(start)}`);
     }
 
-    // function goToMonth(monthIndex: number) {
-    //     setCurrentDate(prev => {
-    //         const d = new Date(prev);
-    //         d.setMonth(monthIndex);
+    function goToMonth(monthIndex: number) {
+        const d = new Date(currentDate);
+        d.setMonth(monthIndex);
 
-    //         return d;
-    //     });
-    // }
+        const start = getStartOfWeek(d);
+
+        router.push(`/upcoming?start=${formatDateLocal(start)}`);
+    }
     
     const router = useRouter();
 
@@ -114,7 +131,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
 
         return () => clearTimeout(timer);
     }, []);
-
+    
     useEffect(() => {
         setLocalTodos(groupedTodos);
     }, [groupedTodos]);
@@ -166,7 +183,14 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
             month: "long",
             year: "numeric"
         });
-    } 
+    }
+
+    const isCurrentWeek = (() => {
+        const today = new Date();
+        const startOfCurrentWeek = getStartOfWeek(today);
+
+        return startOfCurrentWeek.toDateString() === startDate.toDateString();
+    })
      
     return (
         <div className="min-h-screen bg-white mt-6">
@@ -182,7 +206,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                             {/* Month Dropdown */}
                             <div className="flex items-center justify-between">
                                 <select
-                                    // onChange={(e) => goToMonth(Number(e.target.value))}
+                                    onChange={(e) => goToMonth(Number(e.target.value))}
                                     className="border rounded px-2 py-1 text-sm"
                                     value={currentDate.getMonth()}
                                 >
@@ -198,9 +222,16 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                 {/* Left Arrow */}
                                 <button
                                     onClick={goPrevWeek}
-                                    className="p-2 rounded hover:bg-gray-100"
+                                    disabled={isCurrentWeek()}
+                                    className={`p-2 rounded hover:bg-gray-100
+                                                ${
+                                                    isCurrentWeek()
+                                                        ? "opacity-30 cursor-not-allowed"
+                                                        : "hover:bg-gray-100 cursor-pointer"
+                                                }
+                                    `}
                                 >
-                                    <ChevronLeft className="w-5 h-5" />
+                                    <ChevronLeft className="w-5 h-5 cursor-pointer" />
                                 </button>
 
 
@@ -209,11 +240,9 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                     onClick={goNextWeek}
                                     className="p-2 rounded hover:bg-gray-100"
                                 >
-                                    <ChevronRight className="w-5 h-5" />
+                                    <ChevronRight className="w-5 h-5 cursor-pointer" />
                                 </button>
-
                             </div>
-                            
                         </div>
 
                         {/* 7-Day Strip */}
@@ -227,7 +256,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                         key={day.toISOString()}
                                         onClick={() => {
                                             const start = getStartOfWeek(day);
-                                            router.push(`/upcoming?start=${formatDateToNoneUtc(start)}`)
+                                            router.push(`/upcoming?start=${formatDateLocal(start)}`)
                                         }}
                                         className={`flex flex-col gap-3 items-center p-2 rounded-md w-full transition ${
                                             isSelected
@@ -248,7 +277,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                         </div>
 
                         {/* Divider line */}
-                        <div className="border-b-2 border-gray mt-2 mb-2 w-[140%]"></div> 
+                        <div className="border-b-2 border-gray-300 mb-2 w-[140%]"></div> 
                     </div>
                 </div>
 
@@ -260,7 +289,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                         {Object.entries(localTodos)
                             .filter(([date]) => !isToday(date))
                             .map(([date, todos]) => (
-                                <>
+                                <Fragment key={date}>
                                     <div key={date} className="mb-4">
                                         {/* Date heading */}
                                         <h2 className="text-xl font-semibold text-black mb-2">
@@ -315,21 +344,12 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                         <CirclePlus size={18} />
                                         <span>Add task</span>
                                     </Button>
-                                </>
+                                </Fragment>
                         ))} 
                     </div>
                 </div>
 
                 <div className="mb-6">
-                    {/* <Button 
-                        variant="ghost"
-                        onClick={() => setIsAddTaskOpen(true)}
-                        className="text-red-500 font-semibold justify-start w-full cursor-pointer"    
-                    >
-                        <CirclePlus size={18} />
-                        <span>Add task</span>
-                    </Button> */}
-
                     <AddTaskDialog 
                         open={isAddTaskOpen} 
                         onOpenChange={setIsAddTaskOpen}
