@@ -19,6 +19,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     // const [selectedDate, setSelectedDate] = useState(new Date());
     const [isPending, startTransition] = useTransition();
+    const [selectedAddDate, setSelectedAddDate] = useState<Date | null>(null);
 
     const searchParams = useSearchParams();
     const startParam = searchParams.get("start");
@@ -79,22 +80,17 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
     }
 
     function goNextWeek() {
-        const next = new Date(currentDate);
-        next.setDate(next.getDate() + 7);
+        const nextWeekStart = new Date(startDate);
+        nextWeekStart.setDate(nextWeekStart.getDate() + 7);
 
-        const start = getStartOfWeek(next);
-        // setSelectedDate(next);
-
-        router.push(`/upcoming?start=${formatDateLocal(start)}`);
+        router.push(`/upcoming?start=${formatDateLocal(nextWeekStart)}`);
     }
 
     function goPrevWeek() {
-        const prev = new Date(currentDate);
-        prev.setDate(prev.getDate() - 7);
+        const prevWeekStart = new Date(startDate);
+        prevWeekStart.setDate(prevWeekStart.getDate() - 7);
 
-        const start = getStartOfWeek(prev);
-
-        router.push(`/upcoming?start=${formatDateLocal(start)}`);
+        router.push(`/upcoming?start=${formatDateLocal(prevWeekStart)}`);
     }
 
     function goToMonth(monthIndex: number) {
@@ -338,7 +334,10 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                     </div>
                                     <Button 
                                         variant="ghost"
-                                        onClick={() => setIsAddTaskOpen(true)}
+                                        onClick={() => {
+                                            setSelectedAddDate(new Date(date));
+                                            setIsAddTaskOpen(true);
+                                        }}
                                         className="text-red-500 font-semibold justify-start w-full cursor-pointer mb-8"    
                                     >
                                         <CirclePlus size={18} />
@@ -353,6 +352,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                     <AddTaskDialog 
                         open={isAddTaskOpen} 
                         onOpenChange={setIsAddTaskOpen}
+                        defaultDate={selectedAddDate}
                         onUpdate={(newTodo) => {
                             const key = new Date(newTodo.dueDate).toISOString().split("T")[0];
 

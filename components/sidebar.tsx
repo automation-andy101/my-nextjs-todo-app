@@ -21,6 +21,7 @@ import AddTaskDialog from "./add-task-dialog";
 
 export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: boolean;  setSideNavOpen: (value: boolean) => void; }) {    
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+    const [selectedAddDate, setSelectedAddDate] = useState<Date | null>(null);
 
     const pathname = usePathname();
 
@@ -112,7 +113,10 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                     
                     <Button 
                         variant="ghost"
-                        onClick={() => setIsAddTaskOpen(true)}
+                        onClick={() => {
+                            setSelectedAddDate(new Date())
+                            setIsAddTaskOpen(true)
+                        }}
                         className={`${baseItemClass} text-red-500 font-semibold justify-start w-full cursor-pointer`}    
                     >
                         <CirclePlus size={18} />

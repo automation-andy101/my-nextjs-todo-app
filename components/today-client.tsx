@@ -15,6 +15,7 @@ export default function TodayClient({ todos }: { todos: any[] }) {
     const [selectedTodo, setSelectedTodo] = useState<any>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
+    const [selectedAddDate, setSelectedAddDate] = useState<Date | null>(null);
 
     function handleToggleComplete(todo: any) {
         // optimistic update
@@ -49,29 +50,29 @@ export default function TodayClient({ todos }: { todos: any[] }) {
 
     const router = useRouter();
     
-        useEffect(() => {
-            function scheduleRefresh() {
-                const now = new Date();
-    
-                const msUntilMidnight =
-                    new Date(
-                        now.getFullYear(),
-                        now.getMonth(),
-                        now.getDate() + 1
-                    ).getTime() - now.getTime();
-    
-                const timer = setTimeout(() => {
-                    router.refresh();
-                    scheduleRefresh(); 
-                }, msUntilMidnight);
-    
-                return timer;
-            }
-    
-            const timer = scheduleRefresh();
-    
-            return () => clearTimeout(timer);
-        }, []);
+    useEffect(() => {
+        function scheduleRefresh() {
+            const now = new Date();
+
+            const msUntilMidnight =
+                new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate() + 1
+                ).getTime() - now.getTime();
+
+            const timer = setTimeout(() => {
+                router.refresh();
+                scheduleRefresh(); 
+            }, msUntilMidnight);
+
+            return timer;
+        }
+
+        const timer = scheduleRefresh();
+
+        return () => clearTimeout(timer);
+    }, []);
 
     return (
         <div className="min-h-screen bg-white mt-6">
@@ -138,7 +139,11 @@ export default function TodayClient({ todos }: { todos: any[] }) {
                 <div className="mb-6">
                     <Button 
                         variant="ghost"
-                        onClick={() => setIsAddTaskOpen(true)}
+                        onClick={() => {
+                            const date = new Date();
+                            setSelectedAddDate(date)
+                            setIsAddTaskOpen(true)
+                        }}
                         className="text-red-500 font-semibold justify-start w-full cursor-pointer"    
                     >
                         <CirclePlus size={18} />
@@ -148,6 +153,7 @@ export default function TodayClient({ todos }: { todos: any[] }) {
                     <AddTaskDialog 
                         open={isAddTaskOpen} 
                         onOpenChange={setIsAddTaskOpen}
+                        defaultDate={selectedAddDate}
                         onUpdate={(newTodo) => {
                             setLocalTodos(prev => [newTodo, ...prev])
                         }}

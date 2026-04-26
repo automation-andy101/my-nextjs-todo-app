@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -12,18 +12,20 @@ import { toast } from "react-toastify";
 export default function AddTaskDialog({
     open,
     onOpenChange,
+    defaultDate,
     onUpdate
 }: {
     open: boolean,
     onOpenChange: (open: boolean) => void;
+    defaultDate?: Date | null;
     onUpdate?: (newTodo: any) => void;
 }) {
 
-    const [dueDate, setDueDate] = useState<Date | undefined>();
     const [priority, setPriority] = useState(4);
     const [isPriorityOpen, setIsPriorityOpen] = useState(false);
     const [isDateOpen, setIsDateOpen] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
+    const [dueDate, setDueDate] = useState<Date | undefined>(defaultDate ?? new Date());
 
     const priorities = [
         { value: 1, label: "Priority 1", color: "text-red-500" },
@@ -33,6 +35,12 @@ export default function AddTaskDialog({
     ];
 
     const selectedPriority = priorities.find((p) => p.value === priority);
+
+    useEffect(() => {
+        if (open) {
+            setDueDate(defaultDate ?? new Date());
+        }
+    }, [open]);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
