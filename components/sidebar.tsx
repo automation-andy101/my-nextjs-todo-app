@@ -17,10 +17,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { createTodo } from "@/lib/actions/todo";
 import AddTaskDialog from "./add-task-dialog";
+import { SearchDialog } from "./search-dialog";
 
 
-export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: boolean;  setSideNavOpen: (value: boolean) => void; }) {    
+export default function Sidebar({ sideNavOpen, setSideNavOpen }: { 
+    sideNavOpen: boolean; 
+    setSideNavOpen: (value: boolean) => void; 
+}) {    
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [selectedAddDate, setSelectedAddDate] = useState<Date | null>(null);
 
     const pathname = usePathname();
@@ -130,7 +135,13 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                         <CalendarIcon size={18} />
                         <span>Upcoming</span>
                     </Link>
-                    <Link href="/search" className={`${baseItemClass} ${linkClass("/search")}`}>
+                    {/* <Link href="/search" className={`${baseItemClass} ${linkClass("/search")}`}> */}
+                    <Link 
+                        // onClick={setIsSearchOpen(!isSearchOpen)}
+                        href="/search" 
+                        className={`${baseItemClass} 
+                        ${linkClass("/search")}`}
+                    >
                         <Search size={18} />
                         <span>Search</span>
                     </Link>
@@ -141,7 +152,13 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: { sideNavOpen: 
                     open={isAddTaskOpen} 
                     onOpenChange={setIsAddTaskOpen}  
                 />
-                
+
+                { /* Search dialog popup */}
+                <SearchDialog 
+                    open={isSearchOpen}
+                    onOpenChange={setIsSearchOpen}
+                />
+
             </aside>
 
             <Button
