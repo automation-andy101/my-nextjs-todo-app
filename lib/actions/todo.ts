@@ -75,6 +75,35 @@ export async function getUpcomingTodos() {
     return grouped;
 }
 
+export async function searchTodos(searchTerm: String) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        throw new Error("Unauthorized");
+    }
+
+    await connectDB();
+
+    const safeSearch = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const match = {
+        $regex: safeSearch,
+        $options: "i"
+    };
+
+    const todos = await Todo.find({
+        userId: session.user.id,
+        $or: [
+            { title: match },
+            { description: match }
+        ]
+    }).sort({
+        dueDate: 1
+    });;
+
+    return todos;
+}
+
 export async function getUpcomingTodosBetweenDays(startDate: Date, endDate: Date) {
     const session = await getSession();
 

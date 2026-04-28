@@ -135,16 +135,14 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: {
                         <CalendarIcon size={18} />
                         <span>Upcoming</span>
                     </Link>
-                    {/* <Link href="/search" className={`${baseItemClass} ${linkClass("/search")}`}> */}
-                    <Link 
-                        // onClick={setIsSearchOpen(!isSearchOpen)}
-                        href="/search" 
-                        className={`${baseItemClass} 
-                        ${linkClass("/search")}`}
+                    <button 
+                        onClick={() => setIsSearchOpen(true)}
+                        className={`${baseItemClass} ${linkClass("/search")}`}
+                        // className={`${baseItemClass} text-gray-600 hover:bg-gray-100 w-full`}
                     >
                         <Search size={18} />
                         <span>Search</span>
-                    </Link>
+                    </button>
                 </nav>
 
                 { /* Add Todo dialog popup */ }
