@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { formatDate, formatDateLocal } from "@/lib/utils/date";
 
 export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<string, any[]> }) {
     const [localTodos, setLocalTodos] = useState(groupedTodos);
@@ -71,13 +72,6 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
         return date.toISOString().split("T")[0]; // YYYY-MM-DD
     }
 
-    function formatDateLocal(date: Date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-
-        return `${year}-${month}-${day}`;
-    }
 
     function goNextWeek() {
         const nextWeekStart = new Date(startDate);
@@ -171,15 +165,6 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
             setIsDetailsOpen(true);
         });
     };
-
-    function formatDate(d: string) {
-        return new Date(d).toLocaleDateString("en-GB", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        });
-    }
 
     const isCurrentWeek = (() => {
         const today = new Date();

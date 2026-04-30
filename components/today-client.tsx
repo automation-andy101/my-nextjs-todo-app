@@ -8,6 +8,7 @@ import { updateTodo } from "@/lib/actions/todo";
 import { useTransition } from "react";
 import TaskDetailDialog from "./task-detail-dialog";
 import { useRouter } from "next/navigation";
+import { isToday } from "@/lib/utils/date";
 
 export default function TodayClient({ todos }: { todos: any[] }) {
     const [localTodos, setLocalTodos] = useState(todos);
@@ -155,7 +156,9 @@ export default function TodayClient({ todos }: { todos: any[] }) {
                         onOpenChange={setIsAddTaskOpen}
                         defaultDate={selectedAddDate}
                         onUpdate={(newTodo) => {
-                            setLocalTodos(prev => [newTodo, ...prev])
+                            if (isToday(new Date(newTodo.dueDate))) {
+                                setLocalTodos(prev => [newTodo, ...prev])
+                            }
                         }}
                     />
 

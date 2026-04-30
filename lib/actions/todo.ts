@@ -101,7 +101,18 @@ export async function searchTodos(searchTerm: String) {
         dueDate: 1
     });;
 
-    return todos;
+    const grouped: Record<string, any[]> = {};
+
+    for (const todo of todos) {
+        const date = new Date(todo.dueDate);
+
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(JSON.parse(JSON.stringify(todo)));
+    }
+
+    return grouped;
 }
 
 export async function getUpcomingTodosBetweenDays(startDate: Date, endDate: Date) {
