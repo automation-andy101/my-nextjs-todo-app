@@ -1,14 +1,13 @@
 import UpcomingClient from '@/components/upcoming-client';
 import { getUpcomingTodos, getUpcomingTodosBetweenDays } from '@/lib/actions/todo';
 
-type PageProps = {
-  searchParams: Promise<{
-    start?: string;
-  }>;
-}
-export default async function Page({ searchParams }: PageProps) {
-  const params = await searchParams;
+export default async function UpcomingPage({
+  searchParams
+}: {
+  searchParams: Promise<{ start?: string }>;
+}) {
 
+  const params = await searchParams;
   const startParam = params.start;
 
   function getStartOfWeek(date: Date) {

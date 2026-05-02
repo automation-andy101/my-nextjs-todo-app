@@ -11,14 +11,13 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { formatDate, formatDateLocal } from "@/lib/utils/date";
+import { formatDate, formatDateLocal, getStartOfWeek } from "@/lib/utils/date";
 
 export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<string, any[]> }) {
     const [localTodos, setLocalTodos] = useState(groupedTodos);
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [selectedTodo, setSelectedTodo] = useState<any>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-    // const [selectedDate, setSelectedDate] = useState(new Date());
     const [isPending, startTransition] = useTransition();
     const [selectedAddDate, setSelectedAddDate] = useState<Date | null>(null);
 
@@ -44,34 +43,15 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
         });
     }, [startDate]);
 
-    function getStartOfWeek(date: Date) {
-        const d = new Date(date);
-        const day = d.getDay(); // 0 = Sunday
+    // function getStartOfWeek(date: Date) {
+    //     const d = new Date(date);
+    //     const day = d.getDay(); // 0 = Sunday
 
-        d.setDate(d.getDate() - day);
-        d.setHours(0, 0, 0, 0);
+    //     d.setDate(d.getDate() - day);
+    //     d.setHours(0, 0, 0, 0);
 
-        return d;
-    }
-
-    function formatHeaderDate(date: Date) {
-        return date.toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long"
-        });
-    }
-
-    function formatDayLabel(date: Date) {
-        return date.toLocaleDateString("en-GB", {
-            weekday: "short",
-            day: "numeric"
-        });
-    }
-
-    function formatDateToNoneUtc(date: Date) {
-        return date.toISOString().split("T")[0]; // YYYY-MM-DD
-    }
-
+    //     return d;
+    // }
 
     function goNextWeek() {
         const nextWeekStart = new Date(startDate);
@@ -271,7 +251,7 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                             .filter(([date]) => !isToday(date))
                             .map(([date, todos]) => (
                                 <Fragment key={date}>
-                                    <div key={date} className="mb-4">
+                                    <div className="mb-4">
                                         {/* Date heading */}
                                         <h2 className="text-xl font-semibold text-black mb-2">
                                             {formatDate(date)}

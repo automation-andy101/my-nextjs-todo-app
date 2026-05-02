@@ -65,7 +65,8 @@ export async function getUpcomingTodos() {
     const grouped: Record<string, any[]> = {}
 
     for (const todo of todos) {
-        const date = new Date(todo.dueDate);
+        const date = todo.dueDate ? new Date(todo.dueDate) : new Date();
+
         const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
         if (!grouped[key]) grouped[key] = [];
@@ -75,7 +76,7 @@ export async function getUpcomingTodos() {
     return grouped;
 }
 
-export async function searchTodos(searchTerm: String) {
+export async function searchTodos(searchTerm: string) {
     const session = await getSession();
 
     if (!session?.user) {
@@ -97,19 +98,25 @@ export async function searchTodos(searchTerm: String) {
             { title: match },
             { description: match }
         ]
-    }).sort({
-        dueDate: 1
-    });;
+    })
+    .sort({ dueDate: 1})
+    .lean();
 
     const grouped: Record<string, any[]> = {};
 
     for (const todo of todos) {
-        const date = new Date(todo.dueDate);
+        const date = todo.dueDate ? new Date(todo.dueDate) : new Date();
 
         const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
         if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(JSON.parse(JSON.stringify(todo)));
+        grouped[key].push({
+            ...todo,
+            _id: todo._id.toString(),
+            dueDate:todo.dueDate?.toISOString(),
+            createdAt:todo.createdAt?.toISOString(),
+            updatedAt:todo.updatedAt?.toISOString(),
+        });
     }
 
     return grouped;
