@@ -43,16 +43,6 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
         });
     }, [startDate]);
 
-    // function getStartOfWeek(date: Date) {
-    //     const d = new Date(date);
-    //     const day = d.getDay(); // 0 = Sunday
-
-    //     d.setDate(d.getDate() - day);
-    //     d.setHours(0, 0, 0, 0);
-
-    //     return d;
-    // }
-
     function goNextWeek() {
         const nextWeekStart = new Date(startDate);
         nextWeekStart.setDate(nextWeekStart.getDate() + 7);
@@ -154,197 +144,218 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
     })
      
     return (
-        <div className="min-h-screen bg-white mt-6">
-            <div className="container mx-auto p-6">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-black mb-6">Upcoming</h1>
+        // <div className="min-h-screen bg-white mt-6">
+        <div className="min-h-screen bg-white pt-14 md:pt-6 mt-4 sm:mt-2">
+            {/* <div className="container mx-auto p-6"> */}
+            <div className="w-full px-4 sm:px-6">
+                <div className="w-full max-w-3xl">
+                    <div className="mb-6">
+                        <h1 className="text-3xl font-bold text-black mb-6">Upcoming</h1>
 
-                    <div className="flex flex-col gap-4 mb-6">
+                        <div className="flex flex-col gap-4 mb-6">
 
-                        {/* Top Bar */}
-                        <div className="flex items-center justify-between w-full">
+                            {/* Top Bar */}
+                            <div className="flex items-center justify-end w-full">
 
-                            {/* Month Dropdown */}
-                            <div className="flex items-center justify-between">
-                                <select
-                                    onChange={(e) => goToMonth(Number(e.target.value))}
-                                    className="border rounded px-2 py-1 text-sm"
-                                    value={currentDate.getMonth()}
-                                >
-                                    {Array.from({ length: 12 }, (_, i) => (
-                                        <option key={i} value={i}>
-                                            {new Date(0, i).toLocaleString("en-GB", { month: "long" })}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            
-                            <div className="flex gap-4">
-                                {/* Left Arrow */}
-                                <button
-                                    onClick={goPrevWeek}
-                                    disabled={isCurrentWeek()}
-                                    className={`p-2 rounded hover:bg-gray-100
-                                                ${
-                                                    isCurrentWeek()
-                                                        ? "opacity-30 cursor-not-allowed"
-                                                        : "hover:bg-gray-100 cursor-pointer"
-                                                }
-                                    `}
-                                >
-                                    <ChevronLeft className="w-5 h-5 cursor-pointer" />
-                                </button>
-
-
-                                {/* Right Arrow */}
-                                <button
-                                    onClick={goNextWeek}
-                                    className="p-2 rounded hover:bg-gray-100"
-                                >
-                                    <ChevronRight className="w-5 h-5 cursor-pointer" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* 7-Day Strip */}
-                        <div className="flex gap-16">
-
-                            {days.map((day) => {
-                                const isSelected = day.toDateString() === currentDate.toDateString();
-
-                                return (
+                                {/* Month Dropdown */}
+                                {/* <div className="flex items-center justify-between">
+                                    <select
+                                        onChange={(e) => goToMonth(Number(e.target.value))}
+                                        className="border rounded px-2 py-1 text-sm"
+                                        value={currentDate.getMonth()}
+                                    >
+                                        {Array.from({ length: 12 }, (_, i) => (
+                                            <option key={i} value={i}>
+                                                {new Date(0, i).toLocaleString("en-GB", { month: "long" })}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div> */}
+                                
+                                <div className="flex gap-4">
+                                    {/* Left Arrow */}
                                     <button
-                                        key={day.toISOString()}
-                                        onClick={() => {
-                                            const start = getStartOfWeek(day);
-                                            router.push(`/upcoming?start=${formatDateLocal(start)}`)
-                                        }}
-                                        className={`flex flex-col gap-3 items-center p-2 rounded-md w-full transition ${
-                                            isSelected
-                                            ? "bg-black text-white"
-                                            : "hover:bg-gray-100 text-gray-700"
-                                        }`}
+                                        onClick={goPrevWeek}
+                                        disabled={isCurrentWeek()}
+                                        className={`p-2 rounded hover:bg-gray-100
+                                                    ${
+                                                        isCurrentWeek()
+                                                            ? "opacity-30 cursor-not-allowed"
+                                                            : "hover:bg-gray-100 cursor-pointer"
+                                                    }
+                                        `}
                                     >
-                                        <span className="text-xs">
-                                            {day.toLocaleDateString("en-GB", { weekday: "short" })}
-                                        </span>
-
-                                        <span className="text-sm font-medium">
-                                            {day.getDate()}
-                                        </span>
+                                        <ChevronLeft className="w-5 h-5 cursor-pointer" />
                                     </button>
-                                );
-                            })}
-                        </div>
 
-                        {/* Divider line */}
-                        <div className="border-b-2 border-gray-300 mb-2 w-[140%]"></div> 
-                    </div>
-                </div>
 
-                {/* Date */}
-                <div className="mb-6 mt-6">
-
-                    {/* Tasks list */}
-                    <div className="space-y-3">
-                        {Object.entries(localTodos)
-                            .filter(([date]) => !isToday(date))
-                            .map(([date, todos]) => (
-                                <Fragment key={date}>
-                                    <div className="mb-4">
-                                        {/* Date heading */}
-                                        <h2 className="text-xl font-semibold text-black mb-2">
-                                            {formatDate(date)}
-                                        </h2>
-                                        
-                                        {/* Divider line */}
-                                        <div className="border-b-2 border-black mt-2 mb-6 w-[140%]"></div> 
-
-                                        <div className="space-y-3">
-                                            {todos.map((todo: any) => (
-                                                <div
-                                                    key={todo._id}
-                                                    onClick={() => handleDetailsOpen(todo)}
-                                                    className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 rounded px-2 py-1"
-                                                >
-                                                    <div
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleToggleComplete(todo);
-                                                        }}
-                                                        className={`w-6 h-6 flex items-center justify-center ${
-                                                            isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"
-                                                        }`}
-                                                    >
-                                                        {todo.completed ? (
-                                                            <CircleCheck className="w-6 h-6 text-green-500" />
-                                                            ) : (
-                                                            <Circle className="w-6 h-6 text-gray-400 group-hover:scale-110" />
-                                                            )
-                                                        }
-                                                    </div>
-
-                                                    <p
-                                                        className={`transition-all duration-300 ${
-                                                        todo.completed
-                                                            ? "line-through text-gray-400"
-                                                            : "text-gray-700"
-                                                        }`}
-                                                    >
-                                                        {todo.title}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <Button 
-                                        variant="ghost"
-                                        onClick={() => {
-                                            setSelectedAddDate(new Date(date));
-                                            setIsAddTaskOpen(true);
-                                        }}
-                                        className="text-red-500 font-semibold justify-start w-full cursor-pointer mb-8"    
+                                    {/* Right Arrow */}
+                                    <button
+                                        onClick={goNextWeek}
+                                        className="p-2 rounded hover:bg-gray-100"
                                     >
-                                        <CirclePlus size={18} />
-                                        <span>Add task</span>
-                                    </Button>
-                                </Fragment>
-                        ))} 
+                                        <ChevronRight className="w-5 h-5 cursor-pointer" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* 7-Day Strip */}
+                            <div className="flex gap-2 sm:gap-6">
+
+                                {days.map((day) => {
+                                    const isSelected = day.toDateString() === currentDate.toDateString();
+
+                                    return (
+                                        <button
+                                            key={day.toISOString()}
+                                            onClick={() => {
+                                                const start = getStartOfWeek(day);
+                                                router.push(`/upcoming?start=${formatDateLocal(start)}`)
+                                            }}
+                                            className={`flex flex-col gap-3 items-center p-2 rounded-md w-full transition ${
+                                                isSelected
+                                                ? "bg-black text-white"
+                                                : "hover:bg-gray-100 text-gray-700"
+                                            }`}
+                                        >
+                                            <span className="text-xs">
+                                                {day.toLocaleDateString("en-GB", { weekday: "short" })}
+                                            </span>
+
+                                            <span className="text-sm font-medium">
+                                                {day.getDate()}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Divider line */}
+                            <div className="border-b-2 border-gray-300 mt-2 mb-6 w-full"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div className="mb-6">
-                    <AddTaskDialog 
-                        open={isAddTaskOpen} 
-                        onOpenChange={setIsAddTaskOpen}
-                        defaultDate={selectedAddDate}
-                        onUpdate={(newTodo) => {
-                            const key = new Date(newTodo.dueDate).toISOString().split("T")[0];
+                    {/* Date */}
+                    <div className="mb-6 mt-6">
 
-                            setLocalTodos(prev => ({
-                                ...prev,
-                                [key]: [newTodo, ...(prev[key] || [])]
-                            }));
-                        }}
-                    />
+                        {/* Tasks list */}
+                        <div className="space-y-3">
+                            {Object.entries(localTodos)
+                                .filter(([date]) => !isToday(date))
+                                .map(([date, todos]) => (
+                                    <Fragment key={date}>
+                                        <div className="mb-10">
+                                            {/* Date heading */}
+                                            <h2 className="text-xl font-semibold text-black mb-2">
+                                                {formatDate(date)}
+                                            </h2>
+                                            
+                                            {/* Divider line */}
+                                            <div className="border-b-2 border-black mt-2 mb-6 w-full"></div>
 
-                    <TaskDetailDialog
-                        todo={selectedTodo}
-                        open={isDetailsOpen}
-                        onOpenChange={setIsDetailsOpen}
-                        onUpdate={(updatedTodo) => {
-                            setLocalTodos(prev => 
-                                Object.fromEntries(
-                                    Object.entries(prev).map(([date, todos]) => [
-                                        date,
-                                        todos.map(t =>
-                                            t._id === updatedTodo._id ? updatedTodo : t
-                                        )
-                                    ])
-                                )
-                            )}
-                        }
-                    />
+                                            <div className="space-y-3">
+                                                {todos.map((todo: any) => (
+                                                    <div
+                                                        key={todo._id}
+                                                        onClick={() => handleDetailsOpen(todo)}
+                                                        className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 rounded px-2 py-1"
+                                                    >
+                                                        <div
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleToggleComplete(todo);
+                                                            }}
+                                                            className={`w-6 h-6 flex items-center justify-center ${
+                                                                isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"
+                                                            }`}
+                                                        >
+                                                            {todo.completed ? (
+                                                                <CircleCheck className="w-6 h-6 text-green-500" />
+                                                                ) : (
+                                                                <Circle className="w-6 h-6 text-gray-400 group-hover:scale-110" />
+                                                                )
+                                                            }
+                                                        </div>
+
+                                                        <p
+                                                            className={`transition-all duration-300 ${
+                                                            todo.completed
+                                                                ? "line-through text-gray-400"
+                                                                : "text-gray-700"
+                                                            }`}
+                                                        >
+                                                            {todo.title}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* <Button 
+                                                variant="ghost"
+                                                onClick={() => {
+                                                    setSelectedAddDate(new Date(date));
+                                                    setIsAddTaskOpen(true);
+                                                }}
+                                                // className="mt-3 text-red-500 font-semibold justify-start w-full cursor-pointer mb-8"
+                                                className="mt-3 text-red-500 font-medium flex items-center gap-2 hover:bg-gray-50 px-2 py-1 rounded cursor-pointer"   
+                                            >
+                                                <CirclePlus size={18} />
+                                                <span>Add task</span>
+                                            </Button> */}
+
+                                            <div className="mt-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedAddDate(new Date(date));
+                                                        setIsAddTaskOpen(true);
+                                                    }}
+                                                    className="flex items-center gap-2 text-red-500 text-sm font-medium hover:bg-gray-50 px-2 py-1 rounded-md"
+                                                >
+                                                    <CirclePlus size={18} />
+                                                    Add task
+                                                </button>
+                                            </div>
+                                            
+                                        </div>
+                                        
+                                    </Fragment>
+                            ))} 
+                        </div>
+                    </div>
+
+                    <div className="mb-6">
+                        <AddTaskDialog 
+                            open={isAddTaskOpen} 
+                            onOpenChange={setIsAddTaskOpen}
+                            defaultDate={selectedAddDate}
+                            onUpdate={(newTodo) => {
+                                const key = new Date(newTodo.dueDate).toISOString().split("T")[0];
+
+                                setLocalTodos(prev => ({
+                                    ...prev,
+                                    [key]: [newTodo, ...(prev[key] || [])]
+                                }));
+                            }}
+                        />
+
+                        <TaskDetailDialog
+                            todo={selectedTodo}
+                            open={isDetailsOpen}
+                            onOpenChange={setIsDetailsOpen}
+                            onUpdate={(updatedTodo) => {
+                                setLocalTodos(prev => 
+                                    Object.fromEntries(
+                                        Object.entries(prev).map(([date, todos]) => [
+                                            date,
+                                            todos.map(t =>
+                                                t._id === updatedTodo._id ? updatedTodo : t
+                                            )
+                                        ])
+                                    )
+                                )}
+                            }
+                        />
+                    </div>
                 </div>
             </div>
         </div>

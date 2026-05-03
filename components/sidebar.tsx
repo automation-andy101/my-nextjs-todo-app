@@ -45,11 +45,33 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: {
 
     return (
         <>
-            <aside
+            {/* <aside
                 className={`relative top-0 left-0 h-screen w-64 border-r bg-white p-4 transition-transform duration-300 ${
                     sideNavOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
-            > 
+            >  */}
+
+            {/* 🔥 Overlay (mobile only) */}
+            {sideNavOpen && (
+                <div
+                className="fixed inset-0 bg-black/30 z-30 md:hidden"
+                onClick={() => setSideNavOpen(false)}
+                />
+            )}
+            
+            <aside
+                className={`
+                    w-64
+                    h-screen
+                    bg-white border-r p-4
+                    fixed md:static
+                    z-40
+                    transition-transform duration-300
+
+                    ${sideNavOpen ? "translate-x-0" : "-translate-x-full"}
+                    md:translate-x-0
+                `}
+            >
                 <nav className="flex flex-col gap-4">
                     <div className="flex flex-row items-center justify-between pt-3 mb-4">
                         <DropdownMenu
@@ -127,18 +149,26 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: {
                         <CirclePlus size={18} />
                         <span>Add task</span>
                     </Button>
-                    <Link href="/today" className={`${baseItemClass} ${linkClass("/today")}`}>
+                    <Link href="/today"
+                        onClick={() => setSideNavOpen(false)}
+                        className={`${baseItemClass} ${linkClass("/today")}`}
+                    >
                         <ListTodo size={18} />
                         <span>Today</span>
                     </Link>
-                    <Link href="/upcoming" className={`${baseItemClass} ${linkClass("/upcoming")}`}>
+                    <Link href="/upcoming"
+                        onClick={() => setSideNavOpen(false)}
+                        className={`${baseItemClass} ${linkClass("/upcoming")}`}    
+                    >
                         <CalendarIcon size={18} />
                         <span>Upcoming</span>
                     </Link>
-                    <button 
-                        onClick={() => setIsSearchOpen(true)}
+                    <button
+                        onClick={() => {
+                            setIsSearchOpen(true)
+                            setSideNavOpen(false)
+                        }}
                         className={`${baseItemClass} ${linkClass("/search")}`}
-                        // className={`${baseItemClass} text-gray-600 hover:bg-gray-100 w-full`}
                     >
                         <Search size={18} />
                         <span>Search</span>
@@ -158,19 +188,6 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: {
                 />
 
             </aside>
-
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSideNavOpen(!sideNavOpen)}
-                className={`absolute top-4 left-4 z-50 cursor-pointer transition-all duration-300 ${
-                    sideNavOpen
-                        ? "left-60 -translate-x-1/2"
-                        : "left-2"
-                }`} 
-            >
-                <PanelLeft className="w-6 h-6w-6 h-6 transition-all duration-300 scale-130" />
-            </Button>
         </>
     );
 }

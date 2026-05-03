@@ -15,11 +15,12 @@ export async function createTodo(formData: FormData) {
     await connectDB();
 
     const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
+    const descriptionValue = formData.get("description") as string;
     const priority = Number(formData.get("priority")) || 4;
     const dueDateValue = formData.get("dueDate") as string;
 
     const dueDate = dueDateValue ? new Date(dueDateValue) : undefined;
+    const description = descriptionValue?.trim() ? descriptionValue : undefined;
 
     const todo = await Todo.create({
         title,

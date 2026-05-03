@@ -20,7 +20,8 @@ const TodoSchema = new Schema<ITodo>({
         type: String,
         required: false,
         trim: true,
-        minlength: 1,
+        default: "",
+        minlength: 0
     },
     dueDate: {
         type: Date,

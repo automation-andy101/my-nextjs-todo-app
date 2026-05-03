@@ -14,7 +14,7 @@ export default function Navbar() {
             <div className="container items-center mx-auto flex h-18 px-4 justify-between">
                 <Link href="/" className="flex items-center space-x-2 gap-2 text-xl font-semibold text-primary">
                     <CheckSquare />
-                    Todo App
+                    Todoable
                 </Link>
                 <div className="flex items-center gap-8">
                     <Link href="/sign-in">
