@@ -49,6 +49,8 @@ export default function SearchClient({ groupedTodos, searchTerm }: {
     const router = useRouter();
 
     useEffect(() => {
+        let timer: NodeJS.Timeout;
+
         function scheduleRefresh() {
             const now = new Date();
 
@@ -59,18 +61,16 @@ export default function SearchClient({ groupedTodos, searchTerm }: {
                     now.getDate() + 1
                 ).getTime() - now.getTime();
 
-            const timer = setTimeout(() => {
+            timer = setTimeout(() => {
                 router.refresh();
                 scheduleRefresh(); 
             }, msUntilMidnight);
-
-            return timer;
         }
 
-        const timer = scheduleRefresh();
+        scheduleRefresh();
 
         return () => clearTimeout(timer);
-    }, []);
+    }, [router]);
     
     useEffect(() => {
         setLocalTodos(groupedTodos);
@@ -88,6 +88,8 @@ export default function SearchClient({ groupedTodos, searchTerm }: {
     }
 
     function handleToggleComplete(todo: any) {
+        const newCompleted = !todo.completed;
+
         setLocalTodos(prev => {
             const updated = { ...prev };
 
@@ -103,9 +105,7 @@ export default function SearchClient({ groupedTodos, searchTerm }: {
         })
 
         startTransition(() => {
-            updateTodo(
-                todo._id, { completed: !todo.completed }
-            );
+            updateTodo(todo._id, { completed: newCompleted });
         });
     }
 
@@ -116,131 +116,130 @@ export default function SearchClient({ groupedTodos, searchTerm }: {
         });
     };
 
-    const isCurrentWeek = (() => {
+    const isCurrentWeek = useMemo(() => {
         const today = new Date();
         const startOfCurrentWeek = getStartOfWeek(today);
 
         return startOfCurrentWeek.toDateString() === startDate.toDateString();
-    })
+    }, [startDate])
      
     return (
-        <div className="min-h-screen bg-white mt-6">
-            <div className="container mx-auto p-6">
-                <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-black mb-6">Results for "{searchTerm}"</h1>
+        <div className="min-h-screen bg-white pt-14 md:pt-6 mt-4 sm:mt-2">
+            <div className="w-full px-4 sm:px-6">
+                <div className="w-full max-w-3xl">
+                    <div className="mb-6">
+                        <h1 className="text-3xl font-bold text-black mb-6">Results for "{searchTerm}"</h1>
 
-                    <div className="flex flex-col gap-4 mb-6">
+                        <div className="flex flex-col gap-3 mb-6">
+                        </div>
                     </div>
-                </div>
 
-                {/* Date */}
-                <div className="mb-6 mt-6">
+                    {/* Date */}
+                    <div className="mb-6 mt-6">
 
-                    {/* Tasks list */}
-                    <div className="space-y-3">
-                        {Object.entries(localTodos)
-                            .filter(([date]) => !isToday(date))
-                            .map(([date, todos]) => (
-                                <Fragment key={date}>
-                                    <div className="mb-4">
-                                        {/* Date heading */}
-                                        <h2 className="text-xl font-semibold text-black mb-2">
-                                            {formatDate(date)}
-                                        </h2>
-                                        
-                                        {/* Divider line */}
-                                        <div className="border-b-2 border-black mt-2 mb-6 w-[400%]"></div> 
+                        {/* Tasks list */}
+                        <div className="space-y-3">
+                            {Object.entries(localTodos)
+                                .filter(([date]) => !isToday(date))
+                                .map(([date, todos]) => (
+                                    <Fragment key={date}>
+                                        <div className="mb-4">
+                                            {/* Date heading */}
+                                            <h2 className="text-lg sm:text-xl font-semibold mb-2">
+                                                {formatDate(date)}
+                                            </h2>
+                                            
+                                            {/* Divider line */}
+                                            <div className="border-b-2 border-black mt-2 mb-6 w-full"></div> 
 
-                                        <div className="space-y-3">
-                                            {todos.map((todo: any) => (
-                                                <>
-                                                    <div
-                                                        key={todo._id}
-                                                        onClick={() => handleDetailsOpen(todo)}
-                                                        className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 rounded px-2 py-1"
-                                                    >
+                                            <div className="space-y-3">
+                                                {todos.map((todo: any) => (
+                                                    <Fragment key={todo._id}>
                                                         <div
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleToggleComplete(todo);
-                                                            }}
-                                                            className={`w-6 h-6 flex items-center justify-center ${
-                                                                isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"
-                                                            }`}
+                                                            onClick={() => handleDetailsOpen(todo)}
+                                                            className="flex items-center gap-4 py-3 px-2 cursor-pointer group hover:bg-gray-50 rounded"
                                                         >
-                                                            {todo.completed ? (
-                                                                <CircleCheck className="w-6 h-6 text-green-500" />
-                                                                ) : (
-                                                                <Circle className="w-6 h-6 text-gray-400 group-hover:scale-110" />
-                                                                )
-                                                            }
+                                                            <div
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleToggleComplete(todo);
+                                                                }}
+                                                                className={`w-6 h-6 flex items-center justify-center ${
+                                                                    isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"
+                                                                }`}
+                                                            >
+                                                                {todo.completed ? (
+                                                                    <CircleCheck className="w-6 h-6 text-green-500" />
+                                                                    ) : (
+                                                                    <Circle className="w-6 h-6 text-gray-400 group-hover:scale-110" />
+                                                                    )
+                                                                }
+                                                            </div>
+
+                                                            <p
+                                                                className={`transition-all duration-300 ${
+                                                                todo.completed
+                                                                    ? "line-through text-gray-400"
+                                                                    : "text-gray-700"
+                                                                }`}
+                                                            >
+                                                                {todo.title}
+                                                            </p>
+                                                            
                                                         </div>
-
-                                                        <p
-                                                            className={`transition-all duration-300 ${
-                                                            todo.completed
-                                                                ? "line-through text-gray-400"
-                                                                : "text-gray-700"
-                                                            }`}
-                                                        >
-                                                            {todo.title}
-                                                        </p>
-                                                        
-                                                    </div>
-                                                    {/* Divider line */}
-                                                    <div className="border-b-2 border-gray-200 mt-2 mb-6 w-[400%]"></div> 
-                                                </>
-                                            ))}
+                                                    </Fragment>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <Button 
-                                        variant="ghost"
-                                        onClick={() => {
-                                            setSelectedAddDate(new Date(date));
-                                            setIsAddTaskOpen(true);
-                                        }}
-                                        className="text-red-500 font-semibold justify-start w-full cursor-pointer mb-8"    
-                                    >
-                                        <CirclePlus size={18} />
-                                        <span>Add task</span>
-                                    </Button>
-                                </Fragment>
-                        ))} 
+                                        <Button 
+                                            variant="ghost"
+                                            onClick={() => {
+                                                setSelectedAddDate(new Date(date));
+                                                setIsAddTaskOpen(true);
+                                            }}
+                                            className="text-red-500 font-semibold justify-start w-full cursor-pointer mb-8"    
+                                        >
+                                            <CirclePlus size={18} />
+                                            <span>Add task</span>
+                                        </Button>
+                                    </Fragment>
+                            ))} 
+                        </div>
                     </div>
-                </div>
 
-                <div className="mb-6">
-                    <AddTaskDialog 
-                        open={isAddTaskOpen} 
-                        onOpenChange={setIsAddTaskOpen}
-                        defaultDate={selectedAddDate}
-                        onUpdate={(newTodo) => {
-                            const key = new Date(newTodo.dueDate).toISOString().split("T")[0];
+                    <div className="mb-6">
+                        <AddTaskDialog 
+                            open={isAddTaskOpen} 
+                            onOpenChange={setIsAddTaskOpen}
+                            defaultDate={selectedAddDate}
+                            onUpdate={(newTodo) => {
+                                const key = new Date(newTodo.dueDate).toISOString().split("T")[0];
 
-                            setLocalTodos(prev => ({
-                                ...prev,
-                                [key]: [newTodo, ...(prev[key] || [])]
-                            }));
-                        }}
-                    />
+                                setLocalTodos(prev => ({
+                                    ...prev,
+                                    [key]: [newTodo, ...(prev[key] || [])]
+                                }));
+                            }}
+                        />
 
-                    <TaskDetailDialog
-                        todo={selectedTodo}
-                        open={isDetailsOpen}
-                        onOpenChange={setIsDetailsOpen}
-                        onUpdate={(updatedTodo) => {
-                            setLocalTodos(prev => 
-                                Object.fromEntries(
-                                    Object.entries(prev).map(([date, todos]) => [
-                                        date,
-                                        todos.map(t =>
-                                            t._id === updatedTodo._id ? updatedTodo : t
-                                        )
-                                    ])
-                                )
-                            )}
-                        }
-                    />
+                        <TaskDetailDialog
+                            todo={selectedTodo}
+                            open={isDetailsOpen}
+                            onOpenChange={setIsDetailsOpen}
+                            onUpdate={(updatedTodo) => {
+                                setLocalTodos(prev => 
+                                    Object.fromEntries(
+                                        Object.entries(prev).map(([date, todos]) => [
+                                            date,
+                                            todos.map(t =>
+                                                t._id === updatedTodo._id ? updatedTodo : t
+                                            )
+                                        ])
+                                    )
+                                )}
+                            }
+                        />
+                    </div>
                 </div>
             </div>
         </div>
