@@ -124,7 +124,7 @@ export default function SearchClient({ groupedTodos, searchTerm }: {
     }, [startDate])
      
     return (
-        <div className="min-h-screen bg-white pt-14 md:pt-6 mt-4 sm:mt-2">
+        <div className="min-h-screen bg-white pt-1 md:pt-6 mt-4 sm:mt-2">
             <div className="w-full px-4 sm:px-6">
                 <div className="w-full max-w-3xl">
                     <div className="mb-6">
