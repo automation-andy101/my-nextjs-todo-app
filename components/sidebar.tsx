@@ -125,9 +125,9 @@ export default function Sidebar({ sideNavOpen, setSideNavOpen }: {
                                         {/* <span className="text-xs text-muted-foreground">
                                             {session?.user?.email}
                                         </span> */}
-                                        <span className="hidden sm:block text-xs text-muted-foreground">
+                                        {/* <span className="hidden sm:block text-xs text-muted-foreground">
                                             {session?.user?.email}
-                                        </span>
+                                        </span> */}
                                     </div>
                                 </div>
 

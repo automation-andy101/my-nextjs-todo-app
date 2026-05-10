@@ -154,21 +154,6 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
 
                             {/* Top Bar */}
                             <div className="flex items-center justify-end w-full">
-
-                                {/* Month Dropdown */}
-                                {/* <div className="flex items-center justify-between">
-                                    <select
-                                        onChange={(e) => goToMonth(Number(e.target.value))}
-                                        className="border rounded px-2 py-1 text-sm"
-                                        value={currentDate.getMonth()}
-                                    >
-                                        {Array.from({ length: 12 }, (_, i) => (
-                                            <option key={i} value={i}>
-                                                {new Date(0, i).toLocaleString("en-GB", { month: "long" })}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div> */}
                                 
                                 <div className="flex gap-4">
                                     {/* Left Arrow */}
@@ -236,19 +221,24 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
 
                         {/* Tasks list */}
                         <div className="space-y-3">
-                            {Object.entries(localTodos)
-                                .filter(([date]) => !isToday(date))
-                                .map(([date, todos]) => (
-                                    <Fragment key={date}>
+                            {days.map((day) => {
+                                const key = formatDateLocal(day);
+
+                                const todos = localTodos[key] || [];
+
+                                return (
+                                    <Fragment key={key}>
                                         <div className="mb-10">
+
                                             {/* Date heading */}
                                             <h2 className="text-xl font-semibold text-black mb-2">
-                                                {formatDate(date)}
+                                                {formatDate(key)}
                                             </h2>
-                                            
-                                            {/* Divider line */}
+
+                                            {/* Divider */}
                                             <div className="border-b-2 border-black mt-2 mb-6 w-full"></div>
 
+                                            {/* Todos */}
                                             <div className="space-y-3">
                                                 {todos.map((todo: any) => (
                                                     <div
@@ -262,22 +252,23 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                                                 handleToggleComplete(todo);
                                                             }}
                                                             className={`w-6 h-6 flex items-center justify-center ${
-                                                                isPending ? "opacity-50 pointer-events-none" : "cursor-pointer"
+                                                                isPending
+                                                                    ? "opacity-50 pointer-events-none"
+                                                                    : "cursor-pointer"
                                                             }`}
                                                         >
                                                             {todo.completed ? (
                                                                 <CircleCheck className="w-6 h-6 text-green-500" />
-                                                                ) : (
+                                                            ) : (
                                                                 <Circle className="w-6 h-6 text-gray-400 group-hover:scale-110" />
-                                                                )
-                                                            }
+                                                            )}
                                                         </div>
 
                                                         <p
                                                             className={`transition-all duration-300 ${
-                                                            todo.completed
-                                                                ? "line-through text-gray-400"
-                                                                : "text-gray-700"
+                                                                todo.completed
+                                                                    ? "line-through text-gray-400"
+                                                                    : "text-gray-700"
                                                             }`}
                                                         >
                                                             {todo.title}
@@ -286,23 +277,18 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                                 ))}
                                             </div>
 
-                                            {/* <Button 
-                                                variant="ghost"
-                                                onClick={() => {
-                                                    setSelectedAddDate(new Date(date));
-                                                    setIsAddTaskOpen(true);
-                                                }}
-                                                // className="mt-3 text-red-500 font-semibold justify-start w-full cursor-pointer mb-8"
-                                                className="mt-3 text-red-500 font-medium flex items-center gap-2 hover:bg-gray-50 px-2 py-1 rounded cursor-pointer"   
-                                            >
-                                                <CirclePlus size={18} />
-                                                <span>Add task</span>
-                                            </Button> */}
+                                            {/* Empty state */}
+                                            {todos.length === 0 && (
+                                                <p className="text-sm text-gray-400 mb-3">
+                                                    No tasks
+                                                </p>
+                                            )}
 
+                                            {/* Add task */}
                                             <div className="mt-2">
                                                 <button
                                                     onClick={() => {
-                                                        setSelectedAddDate(new Date(date));
+                                                        setSelectedAddDate(day);
                                                         setIsAddTaskOpen(true);
                                                     }}
                                                     className="flex items-center gap-2 text-red-500 text-sm font-medium hover:bg-gray-50 px-2 py-1 rounded-md"
@@ -311,12 +297,14 @@ export default function UpcomingClient({ groupedTodos }: { groupedTodos: Record<
                                                     Add task
                                                 </button>
                                             </div>
-                                            
+
                                         </div>
-                                        
                                     </Fragment>
-                            ))} 
+                                );
+                            })}
                         </div>
+
+
                     </div>
 
                     <div className="mb-6">
